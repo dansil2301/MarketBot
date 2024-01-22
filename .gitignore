@@ -1,0 +1,8 @@
+# Ignore Client_config.json file
+/tokenData/Client_config.json
+
+# Ignore the .idea directory
+.idea/
+
+# Ignore venv
+venv/
