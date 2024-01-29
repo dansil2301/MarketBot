@@ -6,3 +6,6 @@
 
 # Ignore venv
 venv/
+
+# Ignore DB
+/historyData/HistoryData.db
