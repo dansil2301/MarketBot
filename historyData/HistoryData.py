@@ -27,7 +27,6 @@ class HistoryData:
     async def AddData(self, candle: HistoricCandle):
         with sqlite3.connect("HistoryData.db") as conn:
             cursor = conn.cursor()
-
             cursor.execute('''
                 INSERT INTO historyData (open, close, high, low, volume, time, is_completed)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -37,6 +36,21 @@ class HistoryData:
                   self.Converter.ConvertTinkoffMoneyToFloat(candle.low),
                   candle.volume, candle.time, candle.is_complete))
 
+    async def GetAllData(self) -> list[dict]:
+        return_data = list()
+
+        with sqlite3.connect("HistoryData.db") as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute("SELECT `open`, `close`, `high`, `low`, `volume`, `time`, `is_completed` FROM historyData")
+
+            for row in cursor.fetchall():
+                info = dict(row)
+                return_data.append(info)
+
+        return return_data
+
 
 test = HistoryData()
-asyncio.run(test.SaveHistoryData())
+a = asyncio.run(test.GetAllData())
+print(a)
