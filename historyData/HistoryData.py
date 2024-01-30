@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from datetime import timedelta
 from tinkoff.invest import CandleInterval, AsyncClient
@@ -11,6 +12,8 @@ import asyncio
 class HistoryData:
     def __init__(self):
         tokenData = TokenData()
+        script_path = os.path.abspath(__file__)
+        self.db_path = os.path.join(os.path.dirname(script_path), 'HistoryData.db')
         self.TOKEN = tokenData.GetToken("SANDBOX_TOKEN")
         self.Converter = DataCovert()
 
@@ -25,7 +28,7 @@ class HistoryData:
                 print(f"Saved: {candle}")
 
     async def AddData(self, candle: HistoricCandle):
-        with sqlite3.connect("HistoryData.db") as conn:
+        with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute('''
                 INSERT INTO historyData (open, close, high, low, volume, time, is_completed)
@@ -39,10 +42,10 @@ class HistoryData:
     async def GetAllData(self) -> list[dict]:
         return_data = list()
 
-        with sqlite3.connect("HistoryData.db") as conn:
+        with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute("SELECT `open`, `close`, `high`, `low`, `volume`, `time`, `is_completed` FROM historyData")
+            cursor.execute("SELECT `open`, `close`, `high`, `low`, `volume`, `time`, `is_completed` FROM `historyData`")
 
             for row in cursor.fetchall():
                 info = dict(row)
@@ -51,6 +54,7 @@ class HistoryData:
         return return_data
 
 
-test = HistoryData()
-a = asyncio.run(test.GetAllData())
-print(a)
+if __name__ == "__main__":
+    test = HistoryData()
+    a = asyncio.run(test.GetAllData())
+    print(a)
