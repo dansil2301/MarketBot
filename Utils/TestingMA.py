@@ -1,6 +1,6 @@
 import asyncio
-
 from historyData.HistoryData import HistoryData
+
 
 class TestingMA:
     def __init__(self):
@@ -25,6 +25,8 @@ class TestingMA:
                 print("buy", longTermLst[i], shortTerm[i], longTermLst[i - 1], shortTerm[i - 1])
                 sum_bought = candles[i + self.longTerm - 1]["close"]
             if i != 0 and longTermLst[i] >= shortTerm[i] and longTermLst[i - 1] < shortTerm[i - 1]:
+                if sum_bought == 0:
+                    continue
                 print("sell", longTermLst[i], shortTerm[i], longTermLst[i - 1], shortTerm[i - 1])
                 percent = 1 - sum_bought / candles[i + self.longTerm - 1]["close"]
                 self.testing_sum += self.testing_sum * percent

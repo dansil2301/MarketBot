@@ -21,8 +21,8 @@ class HistoryData:
         async with AsyncClient(self.TOKEN) as client:
             async for candle in client.get_all_candles(
                     figi="BBG004730N88",
-                    from_=now() - timedelta(days=365),
-                    interval=CandleInterval.CANDLE_INTERVAL_HOUR,
+                    from_=now() - timedelta(days=30),
+                    interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
             ):
                 await self.AddData(candle)
                 print(f"Saved: {candle}")
@@ -56,5 +56,5 @@ class HistoryData:
 
 if __name__ == "__main__":
     test = HistoryData()
-    a = asyncio.run(test.GetAllData())
+    a = asyncio.run(test.SaveHistoryData())
     print(a)
