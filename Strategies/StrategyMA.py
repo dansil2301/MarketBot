@@ -53,7 +53,7 @@ class StrategyAM:
         while True:
             await asyncio.sleep(1)
 
-    async def asyncStreamClient(self):
+    async def trade(self):
         minuteChecker = now().minute
         long_short = await self.getLongShortTermPeriod()
         async with AsyncClient(self.TOKEN) as client:
@@ -66,21 +66,21 @@ class StrategyAM:
 
     def buySellDecision(self, long_short: dict, newCandle: Candle):
         prev_long = sum(self.converter.ConvertTinkoffMoneyToFloat(candle.close)
-                        for candle in long_short["long"]) / len(long_short["long"])
+                        for candle in long_short["long"]) / self.longTerm
         prev_short = sum(self.converter.ConvertTinkoffMoneyToFloat(candle.close)
-                         for candle in long_short["short"]) / len(long_short["short"])
+                         for candle in long_short["short"]) / self.shortTerm
 
-        long_short["long"].pop(0)
-        long_short["short"].pop(0)
         long_short["long"].append(newCandle)
         long_short["short"].append(newCandle)
+        long_short["long"].pop(0)
+        long_short["short"].pop(0)
 
         new_long = sum(self.converter.ConvertTinkoffMoneyToFloat(candle.close)
-                       for candle in long_short["long"]) / len(long_short["long"])
+                       for candle in long_short["long"]) / self.longTerm
         new_short = sum(self.converter.ConvertTinkoffMoneyToFloat(candle.close)
-                        for candle in long_short["long"]) / len(long_short["long"])
+                        for candle in long_short["short"]) / self.shortTerm
 
-        candleClose = self.converter.ConvertTinkoffMoneyToFloat(newCandle)
+        candleClose = self.converter.ConvertTinkoffMoneyToFloat(newCandle.close)
         if prev_long > prev_short and new_long <= new_short:
             self.boughtAt = candleClose
             print(f"buy, current sum: {self.boughtAt} {prev_long} {new_long}")
@@ -89,7 +89,7 @@ class StrategyAM:
                 percent = 1 - self.boughtAt / candleClose
                 self.testSum += self.testSum * percent
                 print(f"sell, current_balance: {self.testSum}, current sum: {candleClose}")
-            print("couldn't sell")
+            print("couldn't sell ", {candleClose}, prev_short, new_short)
         else:
             print("wait")
 
@@ -98,4 +98,5 @@ class StrategyAM:
 
 if __name__ == "__main__":
     test = StrategyAM()
-    asyncio.run(test.asyncStreamClient())
+    asyncio.run(test.trade())
+
