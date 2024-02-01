@@ -13,12 +13,14 @@ from tinkoff.invest import (
     CandleInterval,
 )
 
+from App.StreamService import StreamService
 from Utils.DataConvert import DataCovert
 from tokenData.TokenData import TokenData
 
 
 class StrategyAM:
     def __init__(self):
+        self.streamService = StreamService()
         tokenData = TokenData()
         self.TOKEN = tokenData.GetToken("SANDBOX_TOKEN")
         self.converter = DataCovert()
