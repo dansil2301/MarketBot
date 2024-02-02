@@ -41,7 +41,7 @@ class StrategyAM:
         async for candle in self.streamService.streamCandle():
             if candle and minuteChecker != candle.time.minute:
                 minuteChecker = candle.time.minute
-                long_short = self.buySellDecision(long_short, candle)
+                long_short = await self.buySellDecision(long_short, candle)
 
     async def buySellDecision(self, long_short: dict, newCandle: Candle):
         prev_long = sum(float(quotation_to_decimal(candle.close))
