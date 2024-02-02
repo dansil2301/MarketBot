@@ -6,7 +6,13 @@ import logging
 import os
 from datetime import datetime
 from decimal import Decimal
-
+from tinkoff.invest import (
+    Client,
+    InstrumentIdType,
+    StopOrderDirection,
+    StopOrderExpirationType,
+    StopOrderType, InvestError,
+)
 from tinkoff.invest import MoneyValue
 from tinkoff.invest.sandbox.client import SandboxClient
 from tinkoff.invest.utils import decimal_to_quotation, quotation_to_decimal
@@ -29,21 +35,19 @@ def add_money_sandbox(client, account_id, money, currency="rub"):
 
 
 def main():
-    """Example - How to set/get balance for sandbox account.
-    How to get/close all sandbox accounts.
-    How to open new sandbox account."""
     with SandboxClient(TOKEN) as client:
-        # get all sandbox accounts
         sandbox_accounts = client.users.get_accounts()
-        print(sandbox_accounts)
+        # account, *_ = response.accounts
+        # account_id = account.id
 
-        # close all sandbox accounts
+        #close all sandbox accounts
         for sandbox_account in sandbox_accounts.accounts:
             client.sandbox.close_sandbox_account(account_id=sandbox_account.id)
 
-        # open new sandbox account
+        #open new sandbox account
         sandbox_account = client.sandbox.open_sandbox_account()
         print(sandbox_account.account_id)
+
         account_id = sandbox_account.account_id
 
         print(add_money_sandbox(client=client, account_id=account_id, money=100000))

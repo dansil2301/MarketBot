@@ -1,6 +1,7 @@
 import asyncio
+from typing import AsyncGenerator
 
-from tinkoff.invest.strategies.base.models import Candle
+from tinkoff.invest.grpc.marketdata_pb2 import Candle
 
 from tokenData.TokenData import TokenData
 
@@ -35,7 +36,7 @@ class StreamService:
         while True:
             await asyncio.sleep(1)
 
-    async def streamCandle(self) -> Candle:
+    async def streamCandle(self) -> AsyncGenerator[Candle, None]:
         '''
         iterator that streams a Candle
         :return: Candle
