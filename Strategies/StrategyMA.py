@@ -18,7 +18,7 @@ class StrategyAM:
         self.TOKEN = TokenData().GetToken("SANDBOX_TOKEN")
         self.streamService = StreamService()
         self.orderLogic = OrderLogic()
-        self.longTerm = 20  # minutes
+        self.longTerm = 50  # minutes
         self.shortTerm = 5  # minutes
         self.figi = "BBG004730N88"
         self.testSum = 100
@@ -67,8 +67,8 @@ class StrategyAM:
         elif prev_long < prev_short and new_long >= new_short:
             if self.boughtAt:
                 await self.orderLogic.sell_request()
-                balance = await self.orderLogic.get_account_details().money
-                print(f"sell, current_balance: {balance}, "
+                balance = await self.orderLogic.get_account_details()
+                print(f"sell, current_balance: {balance.money}"
                       f"current sum: {candleClose}")
             else:
                 print("couldn't sell ", candleClose)
