@@ -17,6 +17,17 @@ class HistoryData:
         self.TOKEN = tokenData.GetToken("SANDBOX_TOKEN")
         self.Converter = DataCovert()
 
+    async def GetTinkoffServerHistoryData(self, periodMinutes: int) -> list[HistoricCandle]:
+        async with AsyncClient(self.TOKEN) as client:
+            candles = list()
+            async for candle in client.get_all_candles(
+                    figi="BBG004730N88",
+                    from_=now() - timedelta(days=periodMinutes),
+                    interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
+            ):
+                candles.append(candle)
+        return candles
+
     async def SaveHistoryData(self) -> None:
         async with AsyncClient(self.TOKEN) as client:
             async for candle in client.get_all_candles(

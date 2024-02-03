@@ -10,6 +10,7 @@ from tinkoff.invest import (
 
 from App.OrderLogic import OrderLogic
 from App.StreamService import StreamService
+from historyData.HistoryData import HistoryData
 from tokenData.TokenData import TokenData
 
 
@@ -24,16 +25,9 @@ class StrategyAM:
         self.testSum = 100
         self.boughtAt = None
 
-    async def getLongShortTermPeriod(self):
-        longTermCandles, shortTermCandles = list(), list()
-        async with AsyncClient(self.TOKEN) as client:
-            async for candle in client.get_all_candles(
-                    figi=self.figi,
-                    from_=now() - timedelta(minutes=(self.longTerm)),
-                    interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
-            ):
-                longTermCandles.append(candle)
-        return {"long": longTermCandles, "short": longTermCandles[len(longTermCandles) - self.shortTerm:]}
+    async def getLongShortTermPeriod(self) -> dict:
+        candles = await HistoryData().GetTinkoffServerHistoryData(self.longTerm)
+        return {"long": candles, "short": candles[len(candles) - self.shortTerm:]}
 
     async def trade(self):
         minuteChecker = now().minute
@@ -43,21 +37,22 @@ class StrategyAM:
                 minuteChecker = candle.time.minute
                 long_short = await self.buySellDecision(long_short, candle)
 
+    def candles_avr_counter(self, candles: list[Candle]) -> float:
+        avg = sum(float(quotation_to_decimal(candle.close))
+                  for candle in candles) / len(candles)
+        return avg
+
     async def buySellDecision(self, long_short: dict, newCandle: Candle):
-        prev_long = sum(float(quotation_to_decimal(candle.close))
-                        for candle in long_short["long"]) / len(long_short["long"])
-        prev_short = sum(float(quotation_to_decimal(candle.close))
-                         for candle in long_short["short"]) / len(long_short["short"])
+        prev_long = self.candles_avr_counter(long_short["long"])
+        prev_short = self.candles_avr_counter(long_short["short"])
 
         long_short["long"].append(newCandle)
         long_short["short"].append(newCandle)
         long_short["long"].pop(0)
         long_short["short"].pop(0)
 
-        new_long = sum(float(quotation_to_decimal(candle.close))
-                       for candle in long_short["long"]) / len(long_short["long"])
-        new_short = sum(float(quotation_to_decimal(candle.close))
-                        for candle in long_short["short"]) / len(long_short["short"])
+        new_long = self.candles_avr_counter(long_short["long"])
+        new_short = self.candles_avr_counter(long_short["short"])
 
         candleClose = float(quotation_to_decimal(newCandle.close))
         if prev_long > prev_short and new_long <= new_short:
