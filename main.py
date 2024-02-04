@@ -14,8 +14,12 @@ from tinkoff.invest import (
     StopOrderType, InvestError,
 )
 from tinkoff.invest import MoneyValue
+from tinkoff.invest.retrying.aio.client import AsyncRetryingClient
 from tinkoff.invest.sandbox.client import SandboxClient
 from tinkoff.invest.utils import decimal_to_quotation, quotation_to_decimal
+from tinkoff.invest import CandleInterval
+from tinkoff.invest.retrying.aio.client import AsyncRetryingClient
+from tinkoff.invest.retrying.settings import RetryClientSettings
 
 from tokenData.TokenData import TokenData
 
@@ -33,6 +37,14 @@ def add_money_sandbox(client, account_id, money, currency="rub"):
         amount=MoneyValue(units=money.units, nano=money.nano, currency=currency),
     )
 
+async def test():
+    async with AsyncRetryingClient(TOKEN, settings=retry_settings) as client:
+        async for candle in client.get_all_candles(
+            figi="BBG000B9XRY4",
+            from_=now() - timedelta(days=301),
+            interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
+        ):
+            print(candle)
 
 def main():
     with SandboxClient(TOKEN) as client:

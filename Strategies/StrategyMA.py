@@ -1,79 +1,51 @@
 import asyncio
-from datetime import timedelta
-
 from tinkoff.invest.grpc.marketdata_pb2 import Candle
-from tinkoff.invest.utils import now, quotation_to_decimal
-from tinkoff.invest import (
-    AsyncClient,
-    CandleInterval,
-)
+from tinkoff.invest.utils import quotation_to_decimal
 
-from App.OrderLogic import OrderLogic
-from App.StreamService import StreamService
+from Strategies.ActionEnum import ActionEnum
 from historyData.HistoryData import HistoryData
-from tokenData.TokenData import TokenData
 
 
 class StrategyAM:
     def __init__(self):
-        self.TOKEN = TokenData().GetToken("SANDBOX_TOKEN")
-        self.streamService = StreamService()
-        self.orderLogic = OrderLogic()
         self.longTerm = 50  # minutes
         self.shortTerm = 5  # minutes
-        self.figi = "BBG004730N88"
-        self.testSum = 100
-        self.boughtAt = None
+        self.moving_avg_container = dict()
+        self.action = ActionEnum.KEEP
 
-    async def getLongShortTermPeriod(self) -> dict:
+        asyncio.run(self._initialize_moving_avg_container())
+
+    async def _initialize_moving_avg_container(self) -> None:
         candles = await HistoryData().GetTinkoffServerHistoryData(self.longTerm)
-        return {"long": candles, "short": candles[len(candles) - self.shortTerm:]}
+        self.moving_avg_container = {
+            "long": candles,
+            "short": candles[len(candles) - self.shortTerm:]
+        }
 
-    async def trade(self):
-        minuteChecker = now().minute
-        long_short = await self.getLongShortTermPeriod()
-        async for candle in self.streamService.streamCandle():
-            if candle and minuteChecker != candle.time.minute:
-                minuteChecker = candle.time.minute
-                long_short = await self.buySellDecision(long_short, candle)
-
-    def candles_avr_counter(self, candles: list[Candle]) -> float:
+    def _candles_avr_counter(self, candles: list[Candle]) -> float:
         avg = sum(float(quotation_to_decimal(candle.close))
                   for candle in candles) / len(candles)
         return avg
 
-    async def buySellDecision(self, long_short: dict, newCandle: Candle):
-        prev_long = self.candles_avr_counter(long_short["long"])
-        prev_short = self.candles_avr_counter(long_short["short"])
+    def _move_candles(self, candles: list[Candle], candle: Candle) -> list[Candle]:
+        new_candles = candles
+        new_candles.pop(0).append(candle)
+        return new_candles
 
-        long_short["long"].append(newCandle)
-        long_short["short"].append(newCandle)
-        long_short["long"].pop(0)
-        long_short["short"].pop(0)
+    async def trade_logic(self, new_candle: Candle) -> ActionEnum:
+        prev_long = self._candles_avr_counter(self.moving_avg_container["long"])
+        prev_short = self._candles_avr_counter(self.moving_avg_container["short"])
 
-        new_long = self.candles_avr_counter(long_short["long"])
-        new_short = self.candles_avr_counter(long_short["short"])
+        self._move_candles(self.moving_avg_container["long"], new_candle)
+        self._move_candles(self.moving_avg_container["short"], new_candle)
 
-        candleClose = float(quotation_to_decimal(newCandle.close))
-        if prev_long > prev_short and new_long <= new_short:
-            self.boughtAt = candleClose
-            await self.orderLogic.buy_request()
-            print(f"buy, current sum: {self.boughtAt}")
-        elif prev_long < prev_short and new_long >= new_short:
-            if self.boughtAt:
-                await self.orderLogic.sell_request()
-                balance = await self.orderLogic.get_account_details()
-                print(f"sell, current_balance: {balance.money}"
-                      f"current sum: {candleClose}")
-            else:
-                print("couldn't sell ", candleClose)
+        current_long = self._candles_avr_counter(self.moving_avg_container["long"])
+        current_short = self._candles_avr_counter(self.moving_avg_container["short"])
+
+        if prev_long > prev_short and current_long <= current_short:
+            return self.action.BUY
+        elif prev_long < prev_short and current_long >= current_short:
+            return self.action.SELL
         else:
-            print("wait", candleClose)
-
-        return long_short
-
-
-if __name__ == "__main__":
-    test = StrategyAM()
-    asyncio.run(test.trade())
+            return self.action.KEEP
 

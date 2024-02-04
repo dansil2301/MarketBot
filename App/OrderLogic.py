@@ -1,24 +1,15 @@
 import asyncio
 from asyncio import sleep
 
-from _decimal import Decimal
-from tinkoff.invest.grpc.operations_pb2 import GetOperationsByCursorRequest, PositionsResponse
-from tinkoff.invest.grpc.operations_pb2_grpc import OperationsService
-from tinkoff.invest.logging import logger
+from tinkoff.invest.grpc.operations_pb2 import PositionsResponse
 from tinkoff.invest.sandbox.client import SandboxClient
-from tinkoff.invest.utils import decimal_to_quotation, quotation_to_decimal
 
 from tokenData.TokenData import TokenData
 
 from tinkoff.invest import (
-    Client,
     OrderDirection,
-    OrderExecutionReportStatus,
     OrderType,
-    PostOrderResponse,
-    StopOrderDirection,
-    StopOrderExpirationType,
-    StopOrderType, AsyncClient, InvestError,
+    InvestError,
 )
 
 
@@ -56,7 +47,7 @@ class OrderLogic:
             order_type = OrderType.ORDER_TYPE_MARKET
             direction = OrderDirection.ORDER_DIRECTION_SELL
             try:
-                response = client.orders.post_order(
+                client.orders.post_order(
                     figi=self.figi, quantity=1,
                     direction=direction, order_type=order_type,
                     account_id=account_id,

@@ -22,7 +22,7 @@ class HistoryData:
             candles = list()
             async for candle in client.get_all_candles(
                     figi="BBG004730N88",
-                    from_=now() - timedelta(days=periodMinutes),
+                    from_=now() - timedelta(minutes=periodMinutes),
                     interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
             ):
                 candles.append(candle)

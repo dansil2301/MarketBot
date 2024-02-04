@@ -1,6 +1,10 @@
+import asyncio
+
 from tinkoff.invest.utils import now
 
-from App.StreamService import StreamService
+from OrderLogic import OrderLogic
+from StreamService import StreamService
+from Strategies.ActionEnum import ActionEnum
 from Strategies.StrategyMA import StrategyAM
 
 
@@ -8,9 +12,28 @@ class App:
     def __init__(self):
         self.strategy = StrategyAM()
         self.streamService = StreamService()
+        self.orderLogic = OrderLogic()
+        self.action = ActionEnum.KEEP
 
     async def trade(self):
         minuteChecker = now().minute
         async for candle in self.streamService.streamCandle():
+            print(candle)
             if candle and minuteChecker != candle.time.minute:
-                minuteChecker = candle.time.minute
+                self.action = await self.strategy.trade_logic(candle)
+                await self.take_action()
+
+    async def take_action(self):
+        if self.action == ActionEnum.BUY:
+            await self.orderLogic.buy_request()
+            print("bought")
+        elif self.action == ActionEnum.SELL:
+            await self.orderLogic.sell_request()
+            print(f"sold: {(await self.orderLogic.get_account_details()).money}")
+        else:
+            print("the sum is being kept")
+
+
+if __name__ == "__main__":
+    app = App()
+    asyncio.run(app.trade())
