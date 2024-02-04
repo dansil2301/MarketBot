@@ -1,2 +1,8 @@
+from tokenData.TokenData import TokenData
+
+
 class Settings:
-    pass
+    def __init__(self):
+        self.TOKEN = TokenData().GetToken("SANDBOX_TOKEN")
+        self.figi = "BBG004730N88"
+        self.percent_down = -5

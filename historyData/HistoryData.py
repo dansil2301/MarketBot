@@ -4,6 +4,8 @@ from datetime import timedelta
 from tinkoff.invest import CandleInterval, AsyncClient
 from tinkoff.invest.grpc.marketdata_pb2 import HistoricCandle
 from tinkoff.invest.utils import now
+
+from App.Settings import Settings
 from tokenData.TokenData import TokenData
 from Utils.DataConvert import DataCovert
 import asyncio
@@ -11,17 +13,16 @@ import asyncio
 
 class HistoryData:
     def __init__(self):
-        tokenData = TokenData()
         script_path = os.path.abspath(__file__)
         self.db_path = os.path.join(os.path.dirname(script_path), 'HistoryData.db')
-        self.TOKEN = tokenData.GetToken("SANDBOX_TOKEN")
         self.Converter = DataCovert()
+        self.settings = Settings()
 
     async def GetTinkoffServerHistoryData(self, periodMinutes: int) -> list[HistoricCandle]:
-        async with AsyncClient(self.TOKEN) as client:
+        async with AsyncClient(self.settings.TOKEN) as client:
             candles = list()
             async for candle in client.get_all_candles(
-                    figi="BBG004730N88",
+                    figi=self.settings.figi,
                     from_=now() - timedelta(minutes=periodMinutes),
                     interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
             ):
@@ -29,7 +30,7 @@ class HistoryData:
         return candles
 
     async def SaveHistoryData(self) -> None:
-        async with AsyncClient(self.TOKEN) as client:
+        async with AsyncClient(self.settings.TOKEN) as client:
             async for candle in client.get_all_candles(
                     figi="BBG004730N88",
                     from_=now() - timedelta(days=30),

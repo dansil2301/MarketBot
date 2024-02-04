@@ -3,14 +3,15 @@ import asyncio
 from tinkoff.invest.utils import now
 
 from OrderLogic import OrderLogic
+from Strategies.StrategyABS import Strategy
 from StreamService import StreamService
 from Strategies.ActionEnum import ActionEnum
 from Strategies.StrategyMA import StrategyAM
 
 
 class App:
-    def __init__(self):
-        self.strategy = StrategyAM()
+    def __init__(self, strategy: Strategy):
+        self.strategy = strategy
         self.streamService = StreamService()
         self.orderLogic = OrderLogic()
         self.action = ActionEnum.KEEP
@@ -35,5 +36,5 @@ class App:
 
 
 if __name__ == "__main__":
-    app = App()
+    app = App(StrategyAM()) # testing AM
     asyncio.run(app.trade())

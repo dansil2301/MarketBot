@@ -3,6 +3,7 @@ from typing import AsyncGenerator
 
 from tinkoff.invest.grpc.marketdata_pb2 import Candle
 
+from App.Settings import Settings
 from tokenData.TokenData import TokenData
 
 from tinkoff.invest import (
@@ -12,14 +13,12 @@ from tinkoff.invest import (
     SubscribeCandlesRequest,
     SubscriptionAction,
     SubscriptionInterval,
-    CandleInterval,
 )
 
 
 class StreamService:
     def __init__(self):
-        tokenData = TokenData()
-        self.TOKEN = tokenData.GetToken("SANDBOX_TOKEN")
+        self.settings = Settings()
 
     async def streamIterator(self) -> None:
         yield MarketDataRequest(
@@ -27,7 +26,7 @@ class StreamService:
                 subscription_action=SubscriptionAction.SUBSCRIPTION_ACTION_SUBSCRIBE,
                 instruments=[
                     CandleInstrument(
-                        figi="BBG004730N88",
+                        figi=self.settings.figi,
                         interval=SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE,
                     )
                 ],
@@ -41,7 +40,7 @@ class StreamService:
         iterator that streams a Candle
         :return: Candle
         '''
-        async with AsyncClient(self.TOKEN) as client:
+        async with AsyncClient(self.settings.TOKEN) as client:
             async for marketdata in client.market_data_stream.market_data_stream(
                     self.streamIterator()
             ):
