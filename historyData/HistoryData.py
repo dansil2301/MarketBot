@@ -3,10 +3,9 @@ import sqlite3
 from datetime import timedelta
 from tinkoff.invest import CandleInterval, AsyncClient
 from tinkoff.invest.grpc.marketdata_pb2 import HistoricCandle
-from tinkoff.invest.utils import now
+from tinkoff.invest.utils import now, quotation_to_decimal
 
 from AppLogic.Settings import Settings
-from Utils.DataConvert import DataCovert
 import asyncio
 
 
@@ -14,7 +13,6 @@ class HistoryData:
     def __init__(self):
         script_path = os.path.abspath(__file__)
         self.db_path = os.path.join(os.path.dirname(script_path), 'HistoryData.db')
-        self.Converter = DataCovert()
         self.settings = Settings()
 
     async def GetTinkoffServerHistoryData(self, periodMinutes: int) -> list[HistoricCandle]:
@@ -44,10 +42,10 @@ class HistoryData:
             cursor.execute('''
                 INSERT INTO historyData (open, close, high, low, volume, time, is_completed)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (self.Converter.ConvertTinkoffMoneyToFloat(candle.open),
-                  self.Converter.ConvertTinkoffMoneyToFloat(candle.close),
-                  self.Converter.ConvertTinkoffMoneyToFloat(candle.high),
-                  self.Converter.ConvertTinkoffMoneyToFloat(candle.low),
+            ''', (float(quotation_to_decimal(candle.open)),
+                  float(quotation_to_decimal(candle.close)),
+                  float(quotation_to_decimal(candle.high)),
+                  float(quotation_to_decimal(candle.low)),
                   candle.volume, candle.time, candle.is_complete))
 
     async def GetAllData(self) -> list[dict]:
