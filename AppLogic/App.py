@@ -1,5 +1,6 @@
 import asyncio
 
+from tinkoff.invest.grpc.marketdata_pb2 import Candle
 from tinkoff.invest.utils import now
 
 from OrderLogic import OrderLogic
@@ -7,7 +8,7 @@ from Strategies.StrategyABS import Strategy
 from Strategies.StrategyEMA import StrategyEMA
 from StreamService import StreamService
 from Strategies.ActionEnum import ActionEnum
-from Strategies.StrategyMA import StrategyAM
+from Strategies.StrategyMA import StrategyMA
 
 
 class App:
@@ -17,7 +18,7 @@ class App:
         self.orderLogic = OrderLogic()
         self.action = ActionEnum.KEEP
 
-    async def trade(self):
+    async def trade(self) -> None:
         minute_checker = now().minute
         async for candle in self.streamService.streamCandle():
             if candle and minute_checker != candle.time.minute:
@@ -25,7 +26,7 @@ class App:
                 self.action = await self.strategy.trade_logic(candle)
                 await self.take_action(candle)
 
-    async def take_action(self, candle):
+    async def take_action(self, candle: Candle) -> None:
         if self.action == ActionEnum.BUY:
             await self.orderLogic.buy_request()
             print("bought ", candle.close)

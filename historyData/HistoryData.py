@@ -65,5 +65,7 @@ class HistoryData:
 
 if __name__ == "__main__":
     test = HistoryData()
-    a = asyncio.run(test.SaveHistoryData())
+    #a = asyncio.run(test.SaveHistoryData())
+    #print(a)
+    a = asyncio.run(test.GetTinkoffServerHistoryData(200))
     print(a)

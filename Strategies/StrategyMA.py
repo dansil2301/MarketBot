@@ -7,7 +7,7 @@ from Strategies.StrategyABS import Strategy
 from historyData.HistoryData import HistoryData
 
 
-class StrategyAM(Strategy):
+class StrategyMA(Strategy):
     def __init__(self):
         self.longTerm = 50  # minutes
         self.shortTerm = 5  # minutes
@@ -18,6 +18,17 @@ class StrategyAM(Strategy):
 
     async def _initialize_moving_avg_container(self) -> None:
         candles = await HistoryData().GetTinkoffServerHistoryData(self.longTerm)
+        self.moving_avg_container = {
+            "long": candles,
+            "short": candles[len(candles) - self.shortTerm:]
+        }
+
+    def initialize_moving_avg_container(self, candles: list) -> None:
+        '''
+        Used for testing on historical data
+        :param candles:
+        :return:
+        '''
         self.moving_avg_container = {
             "long": candles,
             "short": candles[len(candles) - self.shortTerm:]

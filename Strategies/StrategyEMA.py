@@ -10,17 +10,28 @@ from historyData.HistoryData import HistoryData
 
 class StrategyEMA(Strategy):
     def __init__(self):
-        self.longTerm = 50  # minutes
-        self.shortTerm = 5  # minutes
+        self.longTerm = 200  # minutes
+        self.shortTerm = 20  # minutes
         self.longA = 2 / (self.longTerm + 1)
         self.shortA = 2 / (self.shortTerm + 1)
         self.moving_avg_container = dict()
         self.action = ActionEnum.KEEP
 
-        asyncio.run(self._initialize_moving_avg_container())
+        #asyncio.run(self._initialize_moving_avg_container())
 
     async def _initialize_moving_avg_container(self) -> None:
         candles = await HistoryData().GetTinkoffServerHistoryData(self.longTerm)
+        self.moving_avg_container = {
+            "long": self._candles_avr_counter(candles),
+            "short": self._candles_avr_counter(candles[len(candles) - self.shortTerm:])
+        }
+
+    def initialize_moving_avg_container(self, candles: list) -> None:
+        '''
+        Used for testing on historical data
+        :param candles:
+        :return:
+        '''
         self.moving_avg_container = {
             "long": self._candles_avr_counter(candles),
             "short": self._candles_avr_counter(candles[len(candles) - self.shortTerm:])
@@ -39,6 +50,9 @@ class StrategyEMA(Strategy):
 
         current_long = self.longA * current_price + (1 - self.longA) * prev_long
         current_short = self.shortA * current_price + (1 - self.shortA) * prev_short
+
+        self.moving_avg_container["long"] = current_long
+        self.moving_avg_container["short"] = current_short
 
         if prev_long > prev_short and current_long <= current_short:
             return self.action.BUY

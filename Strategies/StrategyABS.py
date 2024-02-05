@@ -9,3 +9,7 @@ class Strategy(ABC):
     @abstractmethod
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         pass
+
+    @abstractmethod
+    def initialize_moving_avg_container(self, candles: list) -> None:
+        pass

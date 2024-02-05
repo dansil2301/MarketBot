@@ -37,14 +37,7 @@ def add_money_sandbox(client, account_id, money, currency="rub"):
         amount=MoneyValue(units=money.units, nano=money.nano, currency=currency),
     )
 
-async def test():
-    async with AsyncRetryingClient(TOKEN, settings=retry_settings) as client:
-        async for candle in client.get_all_candles(
-            figi="BBG000B9XRY4",
-            from_=now() - timedelta(days=301),
-            interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
-        ):
-            print(candle)
+
 
 def main():
     with SandboxClient(TOKEN) as client:
