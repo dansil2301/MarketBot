@@ -30,7 +30,8 @@ class StrategyAM(Strategy):
 
     def _move_candles(self, candles: list[Candle], candle: Candle) -> list[Candle]:
         new_candles = candles
-        new_candles.pop(0).append(candle)
+        new_candles.pop(0)
+        new_candles.append(candle)
         return new_candles
 
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:

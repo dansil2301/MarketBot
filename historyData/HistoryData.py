@@ -5,8 +5,7 @@ from tinkoff.invest import CandleInterval, AsyncClient
 from tinkoff.invest.grpc.marketdata_pb2 import HistoricCandle
 from tinkoff.invest.utils import now
 
-from App.Settings import Settings
-from tokenData.TokenData import TokenData
+from AppLogic.Settings import Settings
 from Utils.DataConvert import DataCovert
 import asyncio
 

@@ -17,22 +17,22 @@ class App:
         self.action = ActionEnum.KEEP
 
     async def trade(self):
-        minuteChecker = now().minute
+        minute_checker = now().minute
         async for candle in self.streamService.streamCandle():
-            print(candle)
-            if candle and minuteChecker != candle.time.minute:
+            if candle and minute_checker != candle.time.minute:
+                minute_checker = candle.time.minute
                 self.action = await self.strategy.trade_logic(candle)
-                await self.take_action()
+                await self.take_action(candle)
 
-    async def take_action(self):
+    async def take_action(self, candle):
         if self.action == ActionEnum.BUY:
             await self.orderLogic.buy_request()
-            print("bought")
+            print("bought ", candle.close)
         elif self.action == ActionEnum.SELL:
             await self.orderLogic.sell_request()
-            print(f"sold: {(await self.orderLogic.get_account_details()).money}")
+            print(f"sold: {(await self.orderLogic.get_account_details()).money} ", candle.close)
         else:
-            print("the sum is being kept")
+            print("the sum is being kept ", candle.close)
 
 
 if __name__ == "__main__":

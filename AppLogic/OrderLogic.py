@@ -4,8 +4,7 @@ from asyncio import sleep
 from tinkoff.invest.grpc.operations_pb2 import PositionsResponse
 from tinkoff.invest.sandbox.client import SandboxClient
 
-from App.Settings import Settings
-from tokenData.TokenData import TokenData
+from Settings import Settings
 
 from tinkoff.invest import (
     OrderDirection,

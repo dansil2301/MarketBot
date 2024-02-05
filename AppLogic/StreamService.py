@@ -3,8 +3,7 @@ from typing import AsyncGenerator
 
 from tinkoff.invest.grpc.marketdata_pb2 import Candle
 
-from App.Settings import Settings
-from tokenData.TokenData import TokenData
+from Settings import Settings
 
 from tinkoff.invest import (
     AsyncClient,
