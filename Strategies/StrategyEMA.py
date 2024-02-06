@@ -17,7 +17,7 @@ class StrategyEMA(Strategy):
         self.moving_avg_container = dict()
         self.action = ActionEnum.KEEP
 
-        #asyncio.run(self._initialize_moving_avg_container())
+        asyncio.run(self._initialize_moving_avg_container())
 
     async def _initialize_moving_avg_container(self) -> None:
         candles = await HistoryData().GetTinkoffServerHistoryData(self.longTerm)

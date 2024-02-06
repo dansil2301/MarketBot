@@ -8,6 +8,7 @@ from Strategies.ActionEnum import ActionEnum
 from Strategies.StrategyABS import Strategy
 from Strategies.StrategyEMA import StrategyEMA
 from Strategies.StrategyMA import StrategyMA
+from Strategies.StrategyRSI import StrategyRSI
 from historyData.HistoryData import HistoryData
 
 
@@ -56,5 +57,5 @@ class HistoryAppTest:
 
 
 if __name__ == "__main__":
-    test = HistoryAppTest(StrategyEMA())
+    test = HistoryAppTest(StrategyRSI())
     asyncio.run(test.trade())
