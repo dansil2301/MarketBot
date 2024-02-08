@@ -1,7 +1,7 @@
 import os
 import sqlite3
 from datetime import timedelta
-from tinkoff.invest import CandleInterval, AsyncClient
+from tinkoff.invest import CandleInterval, AsyncClient, Client
 from tinkoff.invest.grpc.marketdata_pb2 import HistoricCandle
 from tinkoff.invest.utils import now, quotation_to_decimal
 
@@ -27,10 +27,10 @@ class HistoryData:
         return candles
 
     async def SaveHistoryData(self) -> None:
-        async with AsyncClient(self.settings.TOKEN) as client:
-            async for candle in client.get_all_candles(
-                    figi="BBG004730N88",
-                    from_=now() - timedelta(days=30),
+        with Client(self.settings.TOKEN) as client:
+            for candle in client.get_all_candles(
+                    instrument_id="BBG004730N88",
+                    from_=now() - timedelta(minutes=50),
                     interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
             ):
                 await self.AddData(candle)
@@ -65,7 +65,7 @@ class HistoryData:
 
 if __name__ == "__main__":
     test = HistoryData()
-    #a = asyncio.run(test.SaveHistoryData())
-    #print(a)
-    a = asyncio.run(test.GetTinkoffServerHistoryData(200))
+    a = asyncio.run(test.SaveHistoryData())
     print(a)
+    # a = asyncio.run(test.GetTinkoffServerHistoryData(200))
+    # print(a)

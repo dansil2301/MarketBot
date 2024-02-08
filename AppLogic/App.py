@@ -7,8 +7,7 @@ from OrderLogic import OrderLogic
 from Strategies.StrategyABS import Strategy
 from Strategies.StrategyEMA import StrategyEMA
 from StreamService import StreamService
-from Strategies.ActionEnum import ActionEnum
-from Strategies.StrategyMA import StrategyMA
+from Strategies.Utils.ActionEnum import ActionEnum
 
 
 class App:

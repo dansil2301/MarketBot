@@ -1,13 +1,11 @@
 import asyncio
 from _decimal import Decimal
-from tinkoff.invest.grpc.marketdata_pb2 import Candle, HistoricCandle
 from tinkoff.invest.utils import decimal_to_quotation, quotation_to_decimal
-from unicodedata import decimal
 
-from Strategies.ActionEnum import ActionEnum
-from Strategies.StrategyABS import Strategy
 from Strategies.StrategyEMA import StrategyEMA
 from Strategies.StrategyMA import StrategyMA
+from Strategies.Utils.ActionEnum import ActionEnum
+from Strategies.StrategyABS import Strategy
 from Strategies.StrategyRSI import StrategyRSI
 from historyData.HistoryData import HistoryData
 
@@ -57,5 +55,5 @@ class HistoryAppTest:
 
 
 if __name__ == "__main__":
-    test = HistoryAppTest(StrategyRSI())
+    test = HistoryAppTest(StrategyEMA())
     asyncio.run(test.trade())

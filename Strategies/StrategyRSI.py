@@ -3,7 +3,7 @@ import asyncio
 from tinkoff.invest.grpc.marketdata_pb2 import Candle
 from tinkoff.invest.utils import quotation_to_decimal
 
-from Strategies.ActionEnum import ActionEnum
+from Strategies.Utils.ActionEnum import ActionEnum
 from Strategies.StrategyABS import Strategy
 from historyData.HistoryData import HistoryData
 

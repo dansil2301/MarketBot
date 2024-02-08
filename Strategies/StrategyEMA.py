@@ -3,13 +3,15 @@ import asyncio
 from tinkoff.invest.grpc.marketdata_pb2 import Candle
 from tinkoff.invest.utils import quotation_to_decimal
 
-from Strategies.ActionEnum import ActionEnum
+from Strategies.Utils.ActionEnum import ActionEnum
 from Strategies.StrategyABS import Strategy
+from Strategies.Utils.CalcHelper import CalcHelper
 from historyData.HistoryData import HistoryData
 
 
 class StrategyEMA(Strategy):
     def __init__(self):
+        self.calc_helper = CalcHelper()
         self.longTerm = 200  # minutes
         self.shortTerm = 20  # minutes
         self.longA = 2 / (self.longTerm + 1)
@@ -22,8 +24,8 @@ class StrategyEMA(Strategy):
     async def _initialize_moving_avg_container(self) -> None:
         candles = await HistoryData().GetTinkoffServerHistoryData(self.longTerm)
         self.moving_avg_container = {
-            "long": self._candles_avr_counter(candles),
-            "short": self._candles_avr_counter(candles[len(candles) - self.shortTerm:])
+            "long": self.calc_helper.MA_calc(candles),
+            "short": self.calc_helper.MA_calc(candles[len(candles) - self.shortTerm:])
         }
 
     def initialize_moving_avg_container(self, candles: list) -> None:
@@ -33,14 +35,9 @@ class StrategyEMA(Strategy):
         :return:
         '''
         self.moving_avg_container = {
-            "long": self._candles_avr_counter(candles),
-            "short": self._candles_avr_counter(candles[len(candles) - self.shortTerm:])
+            "long": self.calc_helper.MA_calc(candles),
+            "short": self.calc_helper.MA_calc(candles[len(candles) - self.shortTerm:])
         }
-
-    def _candles_avr_counter(self, candles: list[Candle]) -> float:
-        avg = sum(float(quotation_to_decimal(candle.close))
-                  for candle in candles) / len(candles)
-        return avg
 
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         current_price = float(quotation_to_decimal(new_candle.close))
@@ -48,8 +45,8 @@ class StrategyEMA(Strategy):
         prev_long = self.moving_avg_container["long"]
         prev_short = self.moving_avg_container["short"]
 
-        current_long = self.longA * current_price + (1 - self.longA) * prev_long
-        current_short = self.shortA * current_price + (1 - self.shortA) * prev_short
+        current_long = self.calc_helper.EMA_calc(prev_long, self.longA, current_price)
+        current_short = self.calc_helper.EMA_calc(prev_short, self.shortA, current_price)
 
         self.moving_avg_container["long"] = current_long
         self.moving_avg_container["short"] = current_short
