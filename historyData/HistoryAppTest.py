@@ -4,6 +4,7 @@ from tinkoff.invest.utils import decimal_to_quotation, quotation_to_decimal
 
 from Strategies.StrategyEMA import StrategyEMA
 from Strategies.StrategyMA import StrategyMA
+from Strategies.StrategyMACD import StrategyMACD
 from Strategies.Utils.ActionEnum import ActionEnum
 from Strategies.StrategyABS import Strategy
 from Strategies.StrategyRSI import StrategyRSI
@@ -36,7 +37,7 @@ class HistoryAppTest:
         return candles
 
     async def trade(self) -> None:
-        self.strategy.initialize_moving_avg_container((await self.get_historical_candles_period(200))) # this var is manual
+        self.strategy.initialize_moving_avg_container((await self.get_historical_candles_period(35))) # this var is manual
         candles = await self.get_historical_candles_period()
         for candle in candles:
             self.action = await self.strategy.trade_logic(candle)
@@ -55,5 +56,5 @@ class HistoryAppTest:
 
 
 if __name__ == "__main__":
-    test = HistoryAppTest(StrategyEMA())
+    test = HistoryAppTest(StrategyMACD())
     asyncio.run(test.trade())

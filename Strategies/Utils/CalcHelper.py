@@ -8,5 +8,5 @@ class CalcHelper:
                   for candle in candles) / len(candles)
         return avg
 
-    def EMA_calc(self, prev_ema, a_param, current_price):
+    def EMA_calc(self, prev_ema: float, a_param: float, current_price: float) -> float:
         return a_param * current_price + (1 - a_param) * prev_ema

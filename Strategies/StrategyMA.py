@@ -36,18 +36,16 @@ class StrategyMA(Strategy):
             "short": candles[len(candles) - self.shortTerm:]
         }
 
-    def _move_candles(self, candles: list[Candle], candle: Candle) -> list[Candle]:
-        new_candles = candles
-        new_candles.pop(0)
-        new_candles.append(candle)
-        return new_candles
+    def _move_candles(self, candle: Candle) -> None:
+        for name in self.moving_avg_container:
+            self.moving_avg_container[name].pop(0)
+            self.moving_avg_container[name].append(candle)
 
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         prev_long = self.calc_helper.MA_calc(self.moving_avg_container["long"])
         prev_short = self.calc_helper.MA_calc(self.moving_avg_container["short"])
 
-        self._move_candles(self.moving_avg_container["long"], new_candle)
-        self._move_candles(self.moving_avg_container["short"], new_candle)
+        self._move_candles(new_candle)
 
         current_long = self.calc_helper.MA_calc(self.moving_avg_container["long"])
         current_short = self.calc_helper.MA_calc(self.moving_avg_container["short"])

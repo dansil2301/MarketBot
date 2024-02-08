@@ -6,6 +6,7 @@ from tinkoff.invest.utils import now
 from OrderLogic import OrderLogic
 from Strategies.StrategyABS import Strategy
 from Strategies.StrategyEMA import StrategyEMA
+from Strategies.StrategyMACD import StrategyMACD
 from StreamService import StreamService
 from Strategies.Utils.ActionEnum import ActionEnum
 
@@ -37,5 +38,5 @@ class App:
 
 
 if __name__ == "__main__":
-    app = App(StrategyEMA()) # testing
+    app = App(StrategyMACD())  # testing
     asyncio.run(app.trade())
