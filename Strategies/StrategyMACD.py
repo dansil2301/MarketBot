@@ -12,8 +12,8 @@ from historyData.HistoryData import HistoryData
 class StrategyMACD(Strategy):
     def __init__(self):
         self.calc_helper = CalcHelper()
-        self.longTerm = 26  # minutes
-        self.shortTerm = 12  # minutes
+        self.longTerm = 26  # steps
+        self.shortTerm = 12  # steps
         self.signal = 9  # signal step
 
         self.longA = 2 / (self.longTerm + 1)

@@ -30,8 +30,9 @@ class HistoryData:
         with Client(self.settings.TOKEN) as client:
             for candle in client.get_all_candles(
                     instrument_id="BBG004730N88",
-                    from_=now() - timedelta(minutes=50),
-                    interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
+                    from_=now() - timedelta(days=39),
+                    to=now() - timedelta(days=9),
+                    interval=CandleInterval.CANDLE_INTERVAL_5_MIN,
             ):
                 await self.AddData(candle)
                 print(f"Saved: {candle}")
