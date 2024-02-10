@@ -1,5 +1,6 @@
 import asyncio
 from _decimal import Decimal
+from tinkoff.invest.grpc.marketdata_pb2 import CandleInterval
 from tinkoff.invest.utils import decimal_to_quotation, quotation_to_decimal
 
 from Strategies.StrategyEMA import StrategyEMA
@@ -25,22 +26,23 @@ class HistoryAppTest:
         self.commission = 0.0005
         self.bought_at = None
 
-    async def get_historical_candles_period(self, period=None):
+    async def get_historical_candles_period(self, period=None, interval=CandleInterval):
         if not period:
-            candles = (await self.historyData.GetAllData())
+            candles = (await self.historyData.GetAllData(interval))
             for i in range(len(candles)):
                 candles[i] = FakeCandle(decimal_to_quotation(Decimal(candles[i]["close"])))
             return candles
 
-        candles = (await self.historyData.GetAllData())[:period]
+        candles = (await self.historyData.GetAllData(interval))[:period]
         for i in range(len(candles)):
             candles[i] = FakeCandle(decimal_to_quotation(Decimal(candles[i]["close"])))
         return candles
 
     async def trade(self) -> None:
+        interval = CandleInterval.CANDLE_INTERVAL_1_MIN
         self.strategy.initialize_moving_avg_container(
-            (await self.get_historical_candles_period(35)))  # this var is manual
-        candles = await self.get_historical_candles_period()
+            (await self.get_historical_candles_period(35, interval)))  # this var is manual
+        candles = await self.get_historical_candles_period(interval=interval)
         for candle in candles:
             self.action = await self.strategy.trade_logic(candle)
             self.take_action(candle)
@@ -66,5 +68,5 @@ class HistoryAppTest:
 
 
 if __name__ == "__main__":
-    test = HistoryAppTest(StrategyMACD())
+    test = HistoryAppTest(StrategyMA())
     asyncio.run(test.trade())
