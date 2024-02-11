@@ -1,6 +1,7 @@
 import asyncio
+from datetime import timedelta
 
-from tinkoff.invest.grpc.marketdata_pb2 import Candle
+from tinkoff.invest.grpc.marketdata_pb2 import Candle, CandleInterval
 from tinkoff.invest.utils import quotation_to_decimal
 
 from Strategies.Utils.ActionEnum import ActionEnum
@@ -9,7 +10,8 @@ from historyData.HistoryData import HistoryData
 
 
 class StrategyRSI(Strategy):
-    def __init__(self):
+    def __init__(self, interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_1_MIN):
+        super().__init__(interval)
         self.EMA_period = 200  # minutes
         self.gain_loss_container = list()
         self.prev_candle_saver = float
@@ -18,7 +20,11 @@ class StrategyRSI(Strategy):
         asyncio.run(self._initialize_moving_avg_container())
 
     async def _initialize_moving_avg_container(self) -> None:
-        candles = await HistoryData().GetTinkoffServerHistoryData(self.EMA_period + 1)
+        if self.interval != CandleInterval.CANDLE_INTERVAL_HOUR:
+            period = timedelta(minutes=self.EMA_period + 1)
+        else:
+            period = timedelta(hours=self.EMA_period + 1)
+        candles = await HistoryData().GetTinkoffServerHistoryData(period=period, interval=self.interval)
         self.prev_candle_saver = float(quotation_to_decimal(candles[len(candles) - 1].close))
         self.EMA_period = len(candles) # to get rid of api bug
         self.gain_loss_container = candles

@@ -1,5 +1,6 @@
 import asyncio
 from _decimal import Decimal
+from tinkoff.invest import SubscriptionInterval
 from tinkoff.invest.grpc.marketdata_pb2 import CandleInterval
 from tinkoff.invest.utils import decimal_to_quotation, quotation_to_decimal
 
@@ -68,5 +69,7 @@ class HistoryAppTest:
 
 
 if __name__ == "__main__":
-    test = HistoryAppTest(StrategyMA())
+    candle_interval = CandleInterval.CANDLE_INTERVAL_1_MIN
+
+    test = HistoryAppTest(StrategyMACD(candle_interval))
     asyncio.run(test.trade())

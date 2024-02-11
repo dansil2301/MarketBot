@@ -2,7 +2,7 @@ import asyncio
 import datetime
 import time
 
-from tinkoff.invest.grpc.marketdata_pb2 import Candle, SubscriptionInterval
+from tinkoff.invest.grpc.marketdata_pb2 import Candle, SubscriptionInterval, CandleInterval
 from tinkoff.invest.utils import now
 
 from OrderLogic import OrderLogic
@@ -15,16 +15,16 @@ from Strategies.Utils.ActionEnum import ActionEnum
 
 
 class App:
-    def __init__(self, strategy: Strategy):
+    def __init__(self, strategy: Strategy, interval: SubscriptionInterval):
+        self.interval = interval
         self.strategy = strategy
         self.streamService = StreamService()
         self.orderLogic = OrderLogic()
         self.action = ActionEnum.KEEP
 
     async def trade(self) -> None:
-        interval = SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE
         time_checker = now()
-        async for candle in self.streamService.streamCandle(interval):
+        async for candle in self.streamService.streamCandle(self.interval):
             if candle and time_checker != candle.time:
                 self.action = await self.strategy.trade_logic(candle)
                 await self.take_action(candle)
@@ -42,5 +42,8 @@ class App:
 
 
 if __name__ == "__main__":
-    app = App(StrategyMA())  # testing
+    sub_interval = SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE
+    candle_interval = CandleInterval.CANDLE_INTERVAL_1_MIN
+
+    app = App(StrategyMA(candle_interval), sub_interval)  # testing
     asyncio.run(app.trade())

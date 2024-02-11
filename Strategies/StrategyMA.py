@@ -11,7 +11,8 @@ from historyData.HistoryData import HistoryData
 
 
 class StrategyMA(Strategy):
-    def __init__(self):
+    def __init__(self, interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_1_MIN):
+        super().__init__(interval)
         self.calc_helper = CalcHelper()
         self.longTerm = 50  # steps
         self.shortTerm = 5  # steps
@@ -21,12 +22,11 @@ class StrategyMA(Strategy):
         asyncio.run(self._initialize_moving_avg_container())
 
     async def _initialize_moving_avg_container(self) -> None:
-        interval = CandleInterval.CANDLE_INTERVAL_1_MIN
-        if CandleInterval != CandleInterval.CANDLE_INTERVAL_HOUR:
+        if self.interval != CandleInterval.CANDLE_INTERVAL_HOUR:
             period = timedelta(minutes=self.longTerm)
         else:
             period = timedelta(hours=self.longTerm)
-        candles = await HistoryData().GetTinkoffServerHistoryData(period=period, interval=interval)
+        candles = await HistoryData().GetTinkoffServerHistoryData(period=period, interval=self.interval)
         self.moving_avg_container = {
             "long": candles,
             "short": candles[len(candles) - self.shortTerm:]

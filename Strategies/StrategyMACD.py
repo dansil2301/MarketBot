@@ -1,6 +1,7 @@
 import asyncio
+from datetime import timedelta
 
-from tinkoff.invest.grpc.marketdata_pb2 import Candle
+from tinkoff.invest.grpc.marketdata_pb2 import Candle, CandleInterval
 from tinkoff.invest.utils import quotation_to_decimal
 
 from Strategies.StrategyABS import Strategy
@@ -10,7 +11,8 @@ from historyData.HistoryData import HistoryData
 
 
 class StrategyMACD(Strategy):
-    def __init__(self):
+    def __init__(self, interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_1_MIN):
+        super().__init__(interval)
         self.calc_helper = CalcHelper()
         self.longTerm = 26  # steps
         self.shortTerm = 12  # steps
@@ -25,7 +27,11 @@ class StrategyMACD(Strategy):
         asyncio.run(self._initialize_moving_avg_container())
 
     async def _initialize_moving_avg_container(self) -> None:
-        candles = await HistoryData().GetTinkoffServerHistoryData(self.longTerm + self.signal)
+        if self.interval != CandleInterval.CANDLE_INTERVAL_HOUR:
+            period = timedelta(minutes=self.longTerm + self.signal)
+        else:
+            period = timedelta(hours=self.longTerm + self.signal)
+        candles = await HistoryData().GetTinkoffServerHistoryData(period=period, interval=self.interval)
         long, short, signal = self._init_helper(candles)
         self.MACD_parameters = {
             "long": long,

@@ -1,6 +1,7 @@
 import asyncio
+from datetime import timedelta
 
-from tinkoff.invest.grpc.marketdata_pb2 import Candle
+from tinkoff.invest.grpc.marketdata_pb2 import Candle, CandleInterval
 from tinkoff.invest.utils import quotation_to_decimal
 
 from Strategies.Utils.ActionEnum import ActionEnum
@@ -10,7 +11,8 @@ from historyData.HistoryData import HistoryData
 
 
 class StrategyEMA(Strategy):
-    def __init__(self):
+    def __init__(self, interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_1_MIN):
+        super().__init__(interval)
         self.calc_helper = CalcHelper()
         self.longTerm = 200  # minutes
         self.shortTerm = 20  # minutes
@@ -22,7 +24,11 @@ class StrategyEMA(Strategy):
         asyncio.run(self._initialize_moving_avg_container())
 
     async def _initialize_moving_avg_container(self) -> None:
-        candles = await HistoryData().GetTinkoffServerHistoryData(self.longTerm)
+        if self.interval != CandleInterval.CANDLE_INTERVAL_HOUR:
+            period = timedelta(minutes=self.longTerm)
+        else:
+            period = timedelta(hours=self.longTerm)
+        candles = await HistoryData().GetTinkoffServerHistoryData(period=period, interval=self.interval)
         self.moving_avg_container = {
             "long": self.calc_helper.MA_calc(candles),
             "short": self.calc_helper.MA_calc(candles[len(candles) - self.shortTerm:])
