@@ -45,5 +45,5 @@ if __name__ == "__main__":
     sub_interval = SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE
     candle_interval = CandleInterval.CANDLE_INTERVAL_1_MIN
 
-    app = App(StrategyMA(candle_interval), sub_interval)  # testing
+    app = App(StrategyMACD(candle_interval), sub_interval)  # testing
     asyncio.run(app.trade())
