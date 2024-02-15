@@ -83,6 +83,10 @@ class StrategyRSI(Strategy):
 
         return [prev_RSI, current_RSI]
 
+    def get_candle_param(self, new_candle: Candle) -> list[float]:
+        prev_RSI, current_RSI = self._param_calculation(new_candle)
+        return [prev_RSI, current_RSI]
+
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         prev_RSI, current_RSI = self._param_calculation(new_candle)
 

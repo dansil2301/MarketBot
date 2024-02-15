@@ -48,7 +48,7 @@ class StrategyMA(Strategy):
             self.moving_avg_container[name].pop(0)
             self.moving_avg_container[name].append(candle)
 
-    async def trade_logic(self, new_candle: Candle) -> ActionEnum:
+    def _param_calculation(self, new_candle: Candle) -> list[float]:
         prev_long = self.calc_helper.MA_calc(self.moving_avg_container["long"])
         prev_short = self.calc_helper.MA_calc(self.moving_avg_container["short"])
 
@@ -56,6 +56,15 @@ class StrategyMA(Strategy):
 
         current_long = self.calc_helper.MA_calc(self.moving_avg_container["long"])
         current_short = self.calc_helper.MA_calc(self.moving_avg_container["short"])
+
+        return [prev_long, prev_short, current_long, current_short]
+
+    def get_candle_param(self, new_candle: Candle) -> list[float]:
+        prev_long, prev_short, current_long, current_short = self._param_calculation(new_candle)
+        return [prev_long - prev_short, current_long - current_short]
+
+    async def trade_logic(self, new_candle: Candle) -> ActionEnum:
+        prev_long, prev_short, current_long, current_short = self._param_calculation(new_candle)
 
         if prev_long > prev_short and current_long <= current_short:
             return self.action.BUY

@@ -42,7 +42,7 @@ class HistoryAppTest:
     async def trade(self) -> None:
         interval = CandleInterval.CANDLE_INTERVAL_1_MIN
         self.strategy.initialize_moving_avg_container(
-            (await self.get_historical_candles_period(35, interval)))  # this var is manual
+            (await self.get_historical_candles_period(26, interval)))  # this var is manual
         candles = await self.get_historical_candles_period(interval=interval)
         for candle in candles:
             self.action = await self.strategy.trade_logic(candle)
@@ -71,5 +71,5 @@ class HistoryAppTest:
 if __name__ == "__main__":
     candle_interval = CandleInterval.CANDLE_INTERVAL_1_MIN
 
-    test = HistoryAppTest(StrategyRSI(candle_interval))
+    test = HistoryAppTest(StrategyMACD(candle_interval))
     asyncio.run(test.trade())

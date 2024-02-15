@@ -20,3 +20,7 @@ class Strategy(ABC):
     @abstractmethod
     def _param_calculation(self, new_candle: Candle) -> list[float]:
         pass
+
+    @abstractmethod
+    def get_candle_param(self, new_candle: Candle) -> list[float]:
+        pass
