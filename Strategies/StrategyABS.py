@@ -16,3 +16,7 @@ class Strategy(ABC):
     @abstractmethod
     def initialize_moving_avg_container(self, candles: list) -> None:
         pass
+
+    @abstractmethod
+    def _param_calculation(self, new_candle: Candle) -> list[float]:
+        pass
