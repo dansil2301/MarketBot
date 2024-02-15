@@ -6,14 +6,17 @@ from tinkoff.invest.utils import quotation_to_decimal
 
 from Strategies.Utils.ActionEnum import ActionEnum
 from Strategies.StrategyABS import Strategy
+from Strategies.Utils.CalcHelper import CalcHelper
 from historyData.HistoryData import HistoryData
 
 
 class StrategyRSI(Strategy):
     def __init__(self, interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_1_MIN):
         super().__init__(interval)
+        self.calc_helper = CalcHelper()
         self.EMA_period = 200  # minutes
-        self.gain_loss_container = list()
+        self.EMA_A = 2 / (self.EMA_period + 1)
+        self.gain_loss_container = dict()
         self.prev_candle_saver = float
         self.action = ActionEnum.KEEP
 
@@ -25,9 +28,13 @@ class StrategyRSI(Strategy):
         else:
             period = timedelta(hours=self.EMA_period + 1)
         candles = await HistoryData().GetTinkoffServerHistoryData(period=period, interval=self.interval)
+
         self.prev_candle_saver = float(quotation_to_decimal(candles[len(candles) - 1].close))
-        self.EMA_period = len(candles) # to get rid of api bug
-        self.gain_loss_container = candles
+        self.EMA_period = len(candles)  # to get rid of api bug
+        self.gain_loss_container = {
+            "gain": self._candles_avr_loss_gain(candles, "gain"),
+            "loss": self._candles_avr_loss_gain(candles, "loss"),
+        }
 
     def initialize_moving_avg_container(self, candles: list) -> None:
         '''
@@ -36,7 +43,10 @@ class StrategyRSI(Strategy):
         :return:
         '''
         self.prev_candle_saver = float(quotation_to_decimal(candles[len(candles) - 1].close))
-        self.gain_loss_container = candles
+        self.gain_loss_container = {
+            "gain": self._candles_avr_loss_gain(candles, "gain"),
+            "loss": self._candles_avr_loss_gain(candles, "loss"),
+        }
 
     def _candles_avr_loss_gain(self, candles: list[Candle], gain_loss: str) -> float:
         gain_loss_lst = list()
@@ -51,30 +61,35 @@ class StrategyRSI(Strategy):
         avg = sum(gain_loss_lst) / len(gain_loss_lst)
         return avg
 
-    def _move_candles(self, candles: list[Candle], candle: Candle) -> list[Candle]:
-        new_candles = candles
-        new_candles.pop(0)
-        new_candles.append(candle)
-        return new_candles
+    def _param_calculation(self, new_candle: Candle) -> list[float]:
+        current_price = float(quotation_to_decimal(new_candle.close))
 
-    async def trade_logic(self, new_candle: Candle) -> ActionEnum:
-        prev_gain = self._candles_avr_loss_gain(self.gain_loss_container, "gain")
-        prev_loss = self._candles_avr_loss_gain(self.gain_loss_container, "loss")
+        prev_gain = self.gain_loss_container["gain"]
+        prev_loss = self.gain_loss_container["loss"]
         prev_RS = prev_gain / prev_loss
         prev_RSI = 100 - 100 / (1 + prev_RS)
 
-        self._move_candles(self.gain_loss_container, new_candle)
-
-        current_gain = self._candles_avr_loss_gain(self.gain_loss_container, "gain")
-        current_loss = self._candles_avr_loss_gain(self.gain_loss_container, "loss")
+        gain_price = current_price - self.prev_candle_saver if current_price >= self.prev_candle_saver else 0
+        loss_price = self.prev_candle_saver - current_price if current_price < self.prev_candle_saver else 0
+        current_gain = self.calc_helper.EMA_calc(self.gain_loss_container["gain"], self.EMA_A, gain_price)
+        current_loss = self.calc_helper.EMA_calc(self.gain_loss_container["loss"], self.EMA_A, loss_price)
 
         current_RS = current_gain / current_loss
         current_RSI = 100 - 100 / (1 + current_RS)
 
+        self.prev_candle_saver = current_price
+        self.gain_loss_container["gain"] = current_gain
+        self.gain_loss_container["loss"] = current_loss
+
+        return [prev_RSI, current_RSI]
+
+    async def trade_logic(self, new_candle: Candle) -> ActionEnum:
+        prev_RSI, current_RSI = self._param_calculation(new_candle)
+
         if prev_RSI < 50 <= current_RSI:
-            return self.action.BUY
-        elif prev_RSI > 50 >= current_RSI:
             return self.action.SELL
+        elif prev_RSI > 50 >= current_RSI:
+            return self.action.BUY
         else:
             return self.action.KEEP
     

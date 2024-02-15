@@ -71,5 +71,5 @@ class HistoryAppTest:
 if __name__ == "__main__":
     candle_interval = CandleInterval.CANDLE_INTERVAL_1_MIN
 
-    test = HistoryAppTest(StrategyMACD(candle_interval))
+    test = HistoryAppTest(StrategyRSI(candle_interval))
     asyncio.run(test.trade())

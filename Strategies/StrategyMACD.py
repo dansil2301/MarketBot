@@ -65,7 +65,7 @@ class StrategyMACD(Strategy):
 
         return long, short, sum(signal_saver) / len(signal_saver)
 
-    async def trade_logic(self, new_candle: Candle) -> ActionEnum:
+    def _param_calculation(self, new_candle: Candle) -> list[float]:
         current_price = float(quotation_to_decimal(new_candle.close))
 
         prev_MCAD = self.MACD_parameters["short"] - self.MACD_parameters["long"]
@@ -80,6 +80,15 @@ class StrategyMACD(Strategy):
         self.MACD_parameters["short"] = short
         self.MACD_parameters["long"] = long
         self.MACD_parameters["signal"] = current_signal
+
+        return [prev_MCAD, prev_signal, current_MCAD, current_signal]
+
+    def get_candle_param(self, new_candle: Candle) -> list[float]:
+        prev_MCAD, prev_signal, current_MCAD, current_signal = self._param_calculation(new_candle)
+        return [prev_MCAD - prev_signal, current_MCAD - current_signal]
+
+    async def trade_logic(self, new_candle: Candle) -> ActionEnum:
+        prev_MCAD, prev_signal, current_MCAD, current_signal = self._param_calculation(new_candle)
 
         if prev_MCAD < prev_signal and current_MCAD >= current_signal:
             return self.action.BUY

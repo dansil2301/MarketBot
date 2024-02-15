@@ -45,7 +45,7 @@ class StrategyEMA(Strategy):
             "short": self.calc_helper.MA_calc(candles[len(candles) - self.shortTerm:])
         }
 
-    async def trade_logic(self, new_candle: Candle) -> ActionEnum:
+    def _param_calculation(self, new_candle: Candle) -> list[float]:
         current_price = float(quotation_to_decimal(new_candle.close))
 
         prev_long = self.moving_avg_container["long"]
@@ -56,6 +56,15 @@ class StrategyEMA(Strategy):
 
         self.moving_avg_container["long"] = current_long
         self.moving_avg_container["short"] = current_short
+
+        return [prev_long, prev_short, current_long, current_short]
+
+    def get_candle_param(self, new_candle: Candle) -> list[float]:
+        prev_long, prev_short, current_long, current_short = self._param_calculation(new_candle)
+        return [prev_long - prev_short, current_long - current_short]
+
+    async def trade_logic(self, new_candle: Candle) -> ActionEnum:
+        prev_long, prev_short, current_long, current_short = self._param_calculation(new_candle)
 
         if prev_long > prev_short and current_long <= current_short:
             return self.action.BUY
