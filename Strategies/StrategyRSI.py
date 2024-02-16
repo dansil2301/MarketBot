@@ -20,6 +20,7 @@ class StrategyRSI(Strategy):
         self.prev_candle_saver = float
         self.action = ActionEnum.KEEP
 
+        self.history_candles_length = self.EMA_period
         asyncio.run(self._initialize_moving_avg_container())
 
     async def _initialize_moving_avg_container(self) -> None:

@@ -19,13 +19,14 @@ class FakeCandle:
 
 
 class HistoryAppTest:
-    def __init__(self, strategy: Strategy):
+    def __init__(self, strategy: Strategy, candleInterval: CandleInterval):
         self.strategy = strategy
         self.historyData = HistoryData()
         self.action = ActionEnum.KEEP
         self.sum = 1000
         self.commission = 0.0005
         self.bought_at = None
+        self.candle_interval = candleInterval
 
     async def get_historical_candles_period(self, period=None, interval=CandleInterval):
         if not period:
@@ -40,10 +41,9 @@ class HistoryAppTest:
         return candles
 
     async def trade(self) -> None:
-        interval = CandleInterval.CANDLE_INTERVAL_1_MIN  # change if needed
         self.strategy.initialize_moving_avg_container(
-            (await self.get_historical_candles_period(200, interval)))  # this var is manual
-        candles = await self.get_historical_candles_period(interval=interval)
+            (await self.get_historical_candles_period(self.strategy.history_candles_length, self.candle_interval)))
+        candles = await self.get_historical_candles_period(interval=self.candle_interval)
         for candle in candles:
             self.action = await self.strategy.trade_logic(candle)
             self.take_action(candle)
@@ -58,7 +58,7 @@ class HistoryAppTest:
                 self.sum -= self.bought_at * self.commission
         elif self.bought_at:
             current_percent = (float(quotation_to_decimal(candle.close)) / self.bought_at - 1) * 100
-            if current_percent >= 0.5 or current_percent <= -0.1 or self.action == ActionEnum.SELL:
+            if current_percent >= 0.5 or current_percent <= -0.1:
                 if self.bought_at != 0.1 and self.bought_at:
                     current_sum = float(quotation_to_decimal(candle.close))
                     percent = (current_sum / self.bought_at) - 1
@@ -71,5 +71,5 @@ class HistoryAppTest:
 if __name__ == "__main__":
     candle_interval = CandleInterval.CANDLE_INTERVAL_1_MIN
 
-    test = HistoryAppTest(StrategyRSI(candle_interval))
+    test = HistoryAppTest(StrategyMACD(candle_interval), candle_interval)
     asyncio.run(test.trade())

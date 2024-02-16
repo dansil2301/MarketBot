@@ -21,6 +21,7 @@ class StrategyEMA(Strategy):
         self.moving_avg_container = dict()
         self.action = ActionEnum.KEEP
 
+        self.history_candles_length = self.longTerm
         asyncio.run(self._initialize_moving_avg_container())
 
     async def _initialize_moving_avg_container(self) -> None:
