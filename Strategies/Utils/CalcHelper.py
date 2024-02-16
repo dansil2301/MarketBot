@@ -10,3 +10,8 @@ class CalcHelper:
 
     def EMA_calc(self, prev_ema: float, a_param: float, current_price: float) -> float:
         return a_param * current_price + (1 - a_param) * prev_ema
+
+    def cloud_min_max(self, candles: list[Candle]) -> float:
+        min_candle = min(float(quotation_to_decimal(candle.close)) for candle in candles)
+        max_candle = max(float(quotation_to_decimal(candle.close)) for candle in candles)
+        return (min_candle + max_candle) / 2

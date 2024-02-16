@@ -9,3 +9,6 @@ venv/
 
 # Ignore DB
 /historyData/HistoryData.db
+
+# ignore marked data
+DataAnalyze/marked_data
