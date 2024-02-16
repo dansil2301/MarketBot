@@ -13,7 +13,6 @@ from historyData.HistoryData import HistoryData
 class StrategyMACD(Strategy):
     def __init__(self, interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_1_MIN):
         super().__init__(interval)
-        self.calc_helper = CalcHelper()
         self.longTerm = 26  # steps
         self.shortTerm = 12  # steps
         self.signal = 9  # signal step

@@ -13,7 +13,6 @@ from historyData.HistoryData import HistoryData
 class StrategyEMA(Strategy):
     def __init__(self, interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_1_MIN):
         super().__init__(interval)
-        self.calc_helper = CalcHelper()
         self.longTerm = 200  # minutes
         self.shortTerm = 20  # minutes
         self.longA = 2 / (self.longTerm + 1)

@@ -13,7 +13,6 @@ from historyData.HistoryData import HistoryData
 class StrategyMA(Strategy):
     def __init__(self, interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_1_MIN):
         super().__init__(interval)
-        self.calc_helper = CalcHelper()
         self.longTerm = 50  # steps
         self.shortTerm = 5  # steps
         self.moving_avg_container = dict()
