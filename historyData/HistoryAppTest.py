@@ -6,6 +6,7 @@ from tinkoff.invest import SubscriptionInterval
 from tinkoff.invest.grpc.marketdata_pb2 import CandleInterval
 from tinkoff.invest.utils import decimal_to_quotation, quotation_to_decimal
 
+from Strategies.StrategyBB import StrategyBB
 from Strategies.StrategyEMA import StrategyEMA
 from Strategies.StrategyMA import StrategyMA
 from Strategies.StrategyMACD import StrategyMACD
@@ -67,5 +68,5 @@ if __name__ == "__main__":
     date_start = datetime(2022, 2, 1)
     end_date = datetime(2022, 3, 1)
 
-    test = HistoryAppTest(StrategyRSI(candle_interval), candle_interval, date_start, end_date)
+    test = HistoryAppTest(StrategyBB(candle_interval), candle_interval, date_start, end_date)
     asyncio.run(test.trade())

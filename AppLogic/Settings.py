@@ -13,4 +13,6 @@ class Settings:
     def __init__(self):
         self.TOKEN = TokenData().GetToken("SANDBOX_TOKEN")
         self.figi = "BBG004730N88"
-        self.percent_down = -5
+        self.broker_commission = 0.05
+        self.percent_down = 0.1
+        self.percent_up = 0.5

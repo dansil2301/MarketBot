@@ -13,7 +13,7 @@ from historyData.HistoryData import HistoryData
 class StrategyRSI(Strategy):
     def __init__(self, interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_1_MIN):
         super().__init__(interval)
-        self.EMA_period = 200  # minutes
+        self.EMA_period = 200
         self.EMA_A = 2 / (self.EMA_period + 1)
         self.gain_loss_container = dict()
         self.prev_candle_saver = float

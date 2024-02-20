@@ -1,3 +1,5 @@
+import math
+
 from tinkoff.invest.grpc.marketdata_pb2 import Candle
 from tinkoff.invest.utils import quotation_to_decimal
 
@@ -15,3 +17,7 @@ class CalcHelper:
         min_candle = min(float(quotation_to_decimal(candle.close)) for candle in candles)
         max_candle = max(float(quotation_to_decimal(candle.close)) for candle in candles)
         return (min_candle + max_candle) / 2
+
+    def std_dev(self, avr: float, candles: list[Candle]) -> float:
+        power_diff = sum(pow(abs(avr) - float(quotation_to_decimal(candle.close)), 2) for candle in candles)
+        return math.sqrt(power_diff / (len(candles) - 1))
