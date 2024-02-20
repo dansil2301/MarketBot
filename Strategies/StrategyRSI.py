@@ -20,7 +20,7 @@ class StrategyRSI(Strategy):
         self.action = ActionEnum.KEEP
 
         self.history_candles_length = self.EMA_period
-        asyncio.run(self._initialize_moving_avg_container())
+        #asyncio.run(self._initialize_moving_avg_container())
 
     async def _initialize_moving_avg_container(self) -> None:
         if self.interval != CandleInterval.CANDLE_INTERVAL_HOUR:
