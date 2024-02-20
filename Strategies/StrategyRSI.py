@@ -27,7 +27,7 @@ class StrategyRSI(Strategy):
             period = timedelta(minutes=self.EMA_period + 1)
         else:
             period = timedelta(hours=self.EMA_period + 1)
-        candles = await HistoryData().GetTinkoffServerHistoryData(period=period, interval=self.interval)
+        candles = await HistoryData().get_tinkoff_server_data_from_now(period=period, interval=self.interval)
 
         self.prev_candle_saver = float(quotation_to_decimal(candles[len(candles) - 1].close))
         self.EMA_period = len(candles)  # to get rid of api bug

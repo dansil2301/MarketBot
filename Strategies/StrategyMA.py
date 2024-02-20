@@ -26,7 +26,7 @@ class StrategyMA(Strategy):
             period = timedelta(minutes=self.longTerm)
         else:
             period = timedelta(hours=self.longTerm)
-        candles = await HistoryData().GetTinkoffServerHistoryData(period=period, interval=self.interval)
+        candles = await HistoryData().get_tinkoff_server_data_from_now(period=period, interval=self.interval)
         self.moving_avg_container = {
             "long": candles,
             "short": candles[len(candles) - self.shortTerm:]

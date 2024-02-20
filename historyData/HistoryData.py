@@ -15,12 +15,24 @@ class HistoryData:
         self.db_path = os.path.join(os.path.dirname(script_path), 'HistoryData.db')
         self.settings = Settings()
 
-    async def GetTinkoffServerHistoryData(self, period: timedelta, interval: CandleInterval) -> list[HistoricCandle]:
+    async def get_tinkoff_server_data_from_now(self, period: timedelta, interval: CandleInterval) -> list[HistoricCandle]:
         async with AsyncClient(self.settings.TOKEN) as client:
             candles = list()
             async for candle in client.get_all_candles(
                     figi=self.settings.figi,
                     from_=now() - period,
+                    interval=interval,
+            ):
+                candles.append(candle)
+        return candles
+
+    async def get_tinkoff_server_data(self, start: datetime, end: datetime, interval: CandleInterval) -> list[HistoricCandle]:
+        async with AsyncClient(self.settings.TOKEN) as client:
+            candles = list()
+            async for candle in client.get_all_candles(
+                    figi=self.settings.figi,
+                    from_=start,
+                    to=end,
                     interval=interval,
             ):
                 candles.append(candle)

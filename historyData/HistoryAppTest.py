@@ -1,5 +1,7 @@
 import asyncio
 from _decimal import Decimal
+from datetime import datetime
+
 from tinkoff.invest import SubscriptionInterval
 from tinkoff.invest.grpc.marketdata_pb2 import CandleInterval
 from tinkoff.invest.utils import decimal_to_quotation, quotation_to_decimal
@@ -19,7 +21,7 @@ class FakeCandle:
 
 
 class HistoryAppTest:
-    def __init__(self, strategy: Strategy, candleInterval: CandleInterval):
+    def __init__(self, strategy: Strategy, candleInterval: CandleInterval, startTime: datetime, endTime: datetime):
         self.strategy = strategy
         self.historyData = HistoryData()
         self.action = ActionEnum.KEEP
@@ -28,23 +30,15 @@ class HistoryAppTest:
         self.bought_at = None
         self.candle_interval = candleInterval
 
-    async def get_historical_candles_period(self, period=None, interval=CandleInterval):
-        if not period:
-            candles = (await self.historyData.GetAllData(interval))
-            for i in range(len(candles)):
-                candles[i] = FakeCandle(decimal_to_quotation(Decimal(candles[i]["close"])))
-            return candles
-
-        candles = (await self.historyData.GetAllData(interval))[:period]
-        for i in range(len(candles)):
-            candles[i] = FakeCandle(decimal_to_quotation(Decimal(candles[i]["close"])))
-        return candles
+        self.startTime = startTime
+        self.endTime = endTime
 
     async def trade(self) -> None:
-        self.strategy.initialize_moving_avg_container(
-            (await self.get_historical_candles_period(self.strategy.history_candles_length, self.candle_interval)))
-        candles = await self.get_historical_candles_period(interval=self.candle_interval)
-        for candle in candles:
+        all_candles_period = await self.historyData.get_tinkoff_server_data(
+            self.startTime, self.endTime, self.candle_interval)
+
+        self.strategy.initialize_moving_avg_container(all_candles_period[:self.strategy.history_candles_length])
+        for candle in all_candles_period:
             self.action = await self.strategy.trade_logic(candle)
             self.take_action(candle)
 
@@ -70,6 +64,8 @@ class HistoryAppTest:
 
 if __name__ == "__main__":
     candle_interval = CandleInterval.CANDLE_INTERVAL_1_MIN
+    date_start = datetime(2022, 2, 1)
+    end_date = datetime(2022, 3, 1)
 
-    test = HistoryAppTest(StrategyEMA(candle_interval), candle_interval)
+    test = HistoryAppTest(StrategyRSI(candle_interval), candle_interval, date_start, end_date)
     asyncio.run(test.trade())

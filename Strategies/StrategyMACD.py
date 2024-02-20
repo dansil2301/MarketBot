@@ -31,7 +31,7 @@ class StrategyMACD(Strategy):
             period = timedelta(minutes=self.longTerm + self.signal)
         else:
             period = timedelta(hours=self.longTerm + self.signal)
-        candles = await HistoryData().GetTinkoffServerHistoryData(period=period, interval=self.interval)
+        candles = await HistoryData().get_tinkoff_server_data_from_now(period=period, interval=self.interval)
         long, short, signal = self._init_helper(candles)
         self.MACD_parameters = {
             "long": long,
