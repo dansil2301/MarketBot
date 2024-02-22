@@ -10,6 +10,7 @@ from Strategies.StrategyBB import StrategyBB
 from Strategies.StrategyEMA import StrategyEMA
 from Strategies.StrategyMA import StrategyMA
 from Strategies.StrategyMACD import StrategyMACD
+from Strategies.StrategyST import StrategyST
 from Strategies.StrategyStochRSI import StrategyStochRSI
 from Strategies.Utils.ActionEnum import ActionEnum
 from Strategies.StrategyABS import Strategy
@@ -54,7 +55,7 @@ class HistoryAppTest:
                 self.sum -= self.bought_at * self.commission
         elif self.bought_at:
             current_percent = (float(quotation_to_decimal(candle.close)) / self.bought_at - 1) * 100
-            if current_percent >= 0.5 or current_percent <= -0.1:
+            if current_percent >= 0.1 or current_percent <= -0.1:
                 if self.bought_at != 0.1 and self.bought_at:
                     current_sum = float(quotation_to_decimal(candle.close))
                     percent = (current_sum / self.bought_at) - 1
@@ -71,5 +72,5 @@ if __name__ == "__main__":
     date_start = datetime(2023, 2, 1)
     end_date = datetime(2023, 3, 1)
 
-    test = HistoryAppTest(StrategyStochRSI(candle_interval), candle_interval, date_start, end_date)
+    test = HistoryAppTest(StrategyST(candle_interval), candle_interval, date_start, end_date)
     asyncio.run(test.trade())
