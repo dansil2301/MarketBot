@@ -67,9 +67,6 @@ class StrategyStochRSI(Strategy):
         self.param_container["high_low_period"].append(new_candle)
         self.param_container["high_low_period"].pop(0)
         test = list()
-        # for i in self.param_container["high_low_period"]:
-        #     test.append(float(quotation_to_decimal(i.close)))
-        # print(*test)
 
         low, high = self.calc_helper.min_max(self.param_container["high_low_period"])
         high += 1**-5
