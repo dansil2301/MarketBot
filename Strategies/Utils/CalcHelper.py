@@ -10,13 +10,21 @@ class CalcHelper:
                   for candle in candles) / len(candles)
         return avg
 
+    def MA_calc_list_float(self, nums: list[float]) -> float:
+        return sum(nums) / len(nums)
+
     def EMA_calc(self, prev_ema: float, a_param: float, current_price: float) -> float:
         return a_param * current_price + (1 - a_param) * prev_ema
 
-    def cloud_min_max(self, candles: list[Candle]) -> float:
+    def cloud_min_max_avg(self, candles: list[Candle]) -> float:
         min_candle = min(float(quotation_to_decimal(candle.close)) for candle in candles)
         max_candle = max(float(quotation_to_decimal(candle.close)) for candle in candles)
         return (min_candle + max_candle) / 2
+
+    def min_max(self, candles: list[Candle]) -> tuple[float, float]:
+        min_candle = min(float(quotation_to_decimal(candle.close)) for candle in candles)
+        max_candle = max(float(quotation_to_decimal(candle.close)) for candle in candles)
+        return min_candle, max_candle
 
     def std_dev(self, avr: float, candles: list[Candle]) -> float:
         power_diff = sum(pow(abs(avr) - float(quotation_to_decimal(candle.close)), 2) for candle in candles)

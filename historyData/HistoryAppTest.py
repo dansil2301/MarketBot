@@ -10,6 +10,7 @@ from Strategies.StrategyBB import StrategyBB
 from Strategies.StrategyEMA import StrategyEMA
 from Strategies.StrategyMA import StrategyMA
 from Strategies.StrategyMACD import StrategyMACD
+from Strategies.StrategyStochRSI import StrategyStochRSI
 from Strategies.Utils.ActionEnum import ActionEnum
 from Strategies.StrategyABS import Strategy
 from Strategies.StrategyRSI import StrategyRSI
@@ -65,8 +66,10 @@ class HistoryAppTest:
 
 if __name__ == "__main__":
     candle_interval = CandleInterval.CANDLE_INTERVAL_1_MIN
-    date_start = datetime(2022, 2, 1)
-    end_date = datetime(2022, 3, 1)
+    # date_start = datetime(2022, 2, 1)
+    # end_date = datetime(2022, 3, 1)
+    date_start = datetime(2023, 2, 1)
+    end_date = datetime(2023, 3, 1)
 
-    test = HistoryAppTest(StrategyBB(candle_interval), candle_interval, date_start, end_date)
+    test = HistoryAppTest(StrategyStochRSI(candle_interval), candle_interval, date_start, end_date)
     asyncio.run(test.trade())
