@@ -41,10 +41,11 @@ class HistoryAppTest:
         all_candles_period = await self.historyData.get_tinkoff_server_data(
             self.startTime, self.endTime, self.candle_interval)
 
-        self.strategy.initialize_moving_avg_container(all_candles_period[:self.strategy.history_candles_length])
-        for candle in all_candles_period:
-            self.action = await self.strategy.trade_logic(candle)
-            self.take_action(candle)
+        period_candles = all_candles_period[:self.strategy.history_candles_length]
+        self.strategy.initialize_moving_avg_container(period_candles)
+        for i in range(self.strategy.history_candles_length, len(all_candles_period)):
+            self.action = await self.strategy.trade_logic(all_candles_period[i])
+            self.take_action(all_candles_period[i])
 
     def take_action(self, candle):
         if not candle:

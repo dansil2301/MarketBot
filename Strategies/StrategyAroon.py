@@ -16,7 +16,7 @@ class StrategyAroon(Strategy):
         self.param_container = dict()
         self.action = ActionEnum.KEEP
 
-        self.history_candles_length = self.MinMax_period + self.MinMax_period
+        self.history_candles_length = self.MinMax_period
         #asyncio.run(self._initialize_moving_avg_container())
 
     async def _initialize_moving_avg_container(self) -> None:
@@ -58,8 +58,9 @@ class StrategyAroon(Strategy):
         period_float = [float(quotation_to_decimal(candle.close)) for candle in self.param_container["candles"]]
         high_period, low_period = self.find_max_min_index(period_float)
 
-        aroon_up = (self.MinMax_period - (self.MinMax_period - (high_period + 1))) / self.MinMax_period * 100
-        aroon_low = (self.MinMax_period - (self.MinMax_period - (low_period + 1))) / self.MinMax_period * 100
+        high_period, low_period = self.MinMax_period - (high_period + 1), self.MinMax_period - (low_period + 1)
+        aroon_up = ((self.MinMax_period - high_period) / self.MinMax_period) * 100
+        aroon_low = ((self.MinMax_period - low_period) / self.MinMax_period) * 100
 
         return [aroon_up, aroon_low]
 
