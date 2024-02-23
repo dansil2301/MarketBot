@@ -14,10 +14,6 @@ class Strategy(ABC):
         self.calc_helper = CalcHelper()
 
     @abstractmethod
-    async def trade_logic(self, new_candle: Candle) -> ActionEnum:
-        pass
-
-    @abstractmethod
     async def _initialize_moving_avg_container(self) -> None:
         pass
 
@@ -31,4 +27,8 @@ class Strategy(ABC):
 
     @abstractmethod
     def get_candle_param(self, new_candle: Candle) -> list[float]:
+        pass
+
+    @abstractmethod
+    async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         pass
