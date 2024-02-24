@@ -12,3 +12,6 @@ venv/
 
 # ignore marked data
 DataAnalyze/marked_data
+
+# ignore model
+DataAnalyze/random_forest_model.joblib
