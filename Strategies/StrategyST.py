@@ -92,7 +92,7 @@ class StrategyST(Strategy):
         self.param_container["prev_upper"], self.param_container["prev_lower"] = final_upper, final_lower
         self.param_container["ATR"] = current_ATR
 
-        return [final_upper, final_lower]
+        return [final_upper, final_lower, current_ATR]
 
 
 

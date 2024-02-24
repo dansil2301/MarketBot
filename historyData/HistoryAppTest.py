@@ -11,6 +11,7 @@ from Strategies.StrategyBB import StrategyBB
 from Strategies.StrategyEMA import StrategyEMA
 from Strategies.StrategyMA import StrategyMA
 from Strategies.StrategyMACD import StrategyMACD
+from Strategies.StrategyOBV import StrategyOBV
 from Strategies.StrategyST import StrategyST
 from Strategies.StrategyStochRSI import StrategyStochRSI
 from Strategies.Utils.ActionEnum import ActionEnum
@@ -74,5 +75,5 @@ if __name__ == "__main__":
     date_start = datetime(2023, 2, 1)
     end_date = datetime(2023, 3, 1)
 
-    test = HistoryAppTest(StrategyAroon(candle_interval), candle_interval, date_start, end_date)
+    test = HistoryAppTest(StrategyOBV(candle_interval), candle_interval, date_start, end_date)
     asyncio.run(test.trade())
