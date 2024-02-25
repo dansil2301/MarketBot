@@ -15,4 +15,4 @@ class Settings:
         self.figi = "BBG004730N88"
         self.broker_commission = 0.05
         self.percent_down = 0.05
-        self.percent_up = 0.1
+        self.percent_up = 0.5

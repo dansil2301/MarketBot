@@ -35,9 +35,9 @@ class StrategyRandomForest(Strategy):
         self.standard_scaler = StandardScaler()
 
         self.param_container = dict()
-        asyncio.run(self._initialize_moving_avg_container())
+        #asyncio.run(self._initialize_moving_avg_container())
 
-    async def _initialize_moving_avg_container(self, data_set=None) -> None:
+    async def _initialize_moving_avg_container(self) -> None:
         period = timedelta(days=20)
         candles = await HistoryData().get_tinkoff_server_data_from_now(period=period, interval=self.interval)
 
@@ -62,7 +62,25 @@ class StrategyRandomForest(Strategy):
         self.data_for_ss, self.param_container = pd.DataFrame, dict()
 
     def initialize_moving_avg_container(self, candles: list) -> None:
-        pass
+        self.param_container = {"close": [], "volume": [], "open": [], "high": [], "low": []}
+        for candle in candles:
+            self._init_standard_candle_params(candle)
+
+        for strategy in self.strategies:
+            strategy.initialize_moving_avg_container(candles[:strategy.history_candles_length])
+            for candle_index in range(strategy.history_candles_length, len(candles)):
+                params = strategy.get_candle_param(candles[candle_index])
+                for param_name in params:
+                    if candle_index == strategy.history_candles_length:
+                        self.param_container[param_name] = list()
+                        [self.param_container[param_name].append(None) for i in
+                         range(strategy.history_candles_length)]
+                    self.param_container[param_name].append(params[param_name])
+
+        self.data_for_ss = pd.DataFrame(self.param_container)
+        self.data_for_ss = self.data_for_ss.drop(self.data_for_ss.index[:self.history_candles_length])
+        self.standard_scaler.fit(self.data_for_ss)
+        self.data_for_ss, self.param_container = pd.DataFrame, dict()
 
     def _init_standard_candle_params(self, candle: Candle):
         self.param_container["close"].append(float(quotation_to_decimal(candle.close)))

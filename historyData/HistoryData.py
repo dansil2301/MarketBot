@@ -91,10 +91,15 @@ class HistoryData:
 
 if __name__ == "__main__":
     test = HistoryData()
-    asyncio.run(test.SaveHistoryData(interval=CandleInterval.CANDLE_INTERVAL_1_MIN))
-    asyncio.run(test.SaveHistoryData(interval=CandleInterval.CANDLE_INTERVAL_5_MIN))
-    asyncio.run(test.SaveHistoryData(interval=CandleInterval.CANDLE_INTERVAL_10_MIN))
-    asyncio.run(test.SaveHistoryData(interval=CandleInterval.CANDLE_INTERVAL_15_MIN))
-    asyncio.run(test.SaveHistoryData(interval=CandleInterval.CANDLE_INTERVAL_HOUR))
+    # asyncio.run(test.SaveHistoryData(interval=CandleInterval.CANDLE_INTERVAL_1_MIN))
+    # asyncio.run(test.SaveHistoryData(interval=CandleInterval.CANDLE_INTERVAL_5_MIN))
+    # asyncio.run(test.SaveHistoryData(interval=CandleInterval.CANDLE_INTERVAL_10_MIN))
+    # asyncio.run(test.SaveHistoryData(interval=CandleInterval.CANDLE_INTERVAL_15_MIN))
+    # asyncio.run(test.SaveHistoryData(interval=CandleInterval.CANDLE_INTERVAL_HOUR))
     # a = asyncio.run(test.GetTinkoffServerHistoryData(200))
     # print(a)
+    date_start = datetime(2023, 3, 1)
+    end_date = datetime(2023, 4, 1)
+
+    a = asyncio.run(test.get_tinkoff_server_data(start=date_start, end=end_date, interval=CandleInterval.CANDLE_INTERVAL_1_MIN))
+    print(len(a))
