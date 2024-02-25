@@ -83,9 +83,9 @@ class StrategyMACD(Strategy):
 
         return [prev_MCAD, prev_signal, current_MCAD, current_signal]
 
-    def get_candle_param(self, new_candle: Candle) -> list[float]:
+    def get_candle_param(self, new_candle: Candle) -> dict:
         prev_MCAD, prev_signal, current_MCAD, current_signal = self._param_calculation(new_candle)
-        return [prev_MCAD - prev_signal, current_MCAD - current_signal]
+        return {"MACD_prev_diff": prev_MCAD - prev_signal, "MACD_current_diff": current_MCAD - current_signal}
 
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         prev_MCAD, prev_signal, current_MCAD, current_signal = self._param_calculation(new_candle)

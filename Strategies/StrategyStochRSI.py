@@ -61,7 +61,7 @@ class StrategyStochRSI(Strategy):
             "%D": D
         }
 
-    def _param_calculation(self, new_candle: Candle) -> list[float]:
+    def _param_calculation(self, new_candle: Candle) -> tuple[float]:
         current_price = float(quotation_to_decimal(new_candle.close))
 
         self.param_container["high_low_period"].append(new_candle)
@@ -76,8 +76,9 @@ class StrategyStochRSI(Strategy):
 
         return K, D
 
-    def get_candle_param(self, new_candle: Candle) -> list[float]:
-        return self._param_calculation(new_candle)
+    def get_candle_param(self, new_candle: Candle) -> dict:
+        K, D = self._param_calculation(new_candle)
+        return {"StochRSI_K": K, "StochRSI_D": D}
 
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         K, D = self._param_calculation(new_candle)

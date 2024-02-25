@@ -76,9 +76,9 @@ class StrategyOBV(Strategy):
 
         return [self.param_container["OBV"], OBV_MA]
 
-    def get_candle_param(self, new_candle: Candle) -> list[float]:
-        OBV, prev_OBV, OBV_MA, prev_OBV_MA = self._param_calculation(new_candle)
-        return [OBV - prev_OBV, OBV_MA - prev_OBV_MA]
+    def get_candle_param(self, new_candle: Candle) -> dict:
+        OBV, OBV_MA = self._param_calculation(new_candle)
+        return {"OBV": OBV, "OBV_MA": OBV_MA}
 
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         OBV, prev_OBV, OBV_MA, prev_OBV_MA = self._param_calculation(new_candle)

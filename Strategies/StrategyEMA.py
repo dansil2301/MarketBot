@@ -59,9 +59,9 @@ class StrategyEMA(Strategy):
 
         return [prev_long, prev_short, current_long, current_short]
 
-    def get_candle_param(self, new_candle: Candle) -> list[float]:
+    def get_candle_param(self, new_candle: Candle) -> dict:
         prev_long, prev_short, current_long, current_short = self._param_calculation(new_candle)
-        return [prev_long - prev_short, current_long - current_short]
+        return {"EMA_prev_diff": prev_long - prev_short, "EMA_current_diff": current_long - current_short}
 
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         prev_long, prev_short, current_long, current_short = self._param_calculation(new_candle)

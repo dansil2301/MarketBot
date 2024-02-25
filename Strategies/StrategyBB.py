@@ -49,8 +49,9 @@ class StrategyBB(Strategy):
         lower_line = middle_line - (self.D * self.calc_helper.std_dev(middle_line, self.moving_avg_container["avr_period"]))
         return [middle_line, upper_line, lower_line]
 
-    def get_candle_param(self, new_candle: Candle) -> list[float]:
-        return self._param_calculation(new_candle)
+    def get_candle_param(self, new_candle: Candle) -> dict:
+        middle_line, upper_line, lower_line = self._param_calculation(new_candle)
+        return {"BB_upper": upper_line, "BB_lower": lower_line}
 
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         current_price = float(quotation_to_decimal(new_candle.close))

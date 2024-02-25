@@ -26,7 +26,7 @@ class Strategy(ABC):
         pass
 
     @abstractmethod
-    def get_candle_param(self, new_candle: Candle) -> list[float]:
+    def get_candle_param(self, new_candle: Candle) -> dict:
         pass
 
     @abstractmethod

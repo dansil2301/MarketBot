@@ -64,8 +64,9 @@ class StrategyAroon(Strategy):
 
         return [aroon_up, aroon_low]
 
-    def get_candle_param(self, new_candle: Candle) -> list[float]:
-        return self._param_calculation(new_candle)
+    def get_candle_param(self, new_candle: Candle) -> dict:
+        aroon_up, aroon_low = self._param_calculation(new_candle)
+        return {"aroon_up": aroon_up, "aroon_low": aroon_low}
 
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         aroon_up, aroon_low = self._param_calculation(new_candle)

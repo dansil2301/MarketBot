@@ -94,10 +94,9 @@ class StrategyST(Strategy):
 
         return [final_upper, final_lower, current_ATR]
 
-
-
-    def get_candle_param(self, new_candle: Candle) -> list[float]:
-        return self._param_calculation(new_candle)
+    def get_candle_param(self, new_candle: Candle) -> dict:
+        final_upper, final_lower, current_ATR = self._param_calculation(new_candle)
+        return {"ST_upper": final_upper, "ST_lower": final_lower, "ATR": current_ATR}
 
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         current_price = float(quotation_to_decimal(new_candle.close))
