@@ -55,7 +55,7 @@ class HistoryAppTest:
 
     async def init_candles_for_new_day(self, current_date: datetime):
         self.strategy = StrategyRandomForest(self.candle_interval)
-        period = timedelta(days=20)
+        period = timedelta(days=4)
         candles = await HistoryData().get_tinkoff_server_data(end=current_date, start=current_date - period,
                                                               interval=self.candle_interval)
         new_candles = []
@@ -69,7 +69,7 @@ class HistoryAppTest:
     async def trade(self) -> None:
         # await self.historyData.get_tinkoff_server_data(self.startTime, self.endTime, self.candle_interval)
         # await self.get_year_candles(2023)
-        all_candles_period = await self.historyData.get_tinkoff_server_data(self.startTime, self.endTime, self.candle_interval)
+        all_candles_period = await self.get_year_candles(2023)
         date_candle = datetime.strptime(str(all_candles_period[self.strategy.history_candles_length].time).replace('+00:00', ''), '%Y-%m-%d %H:%M:%S')
 
         if self.strategy.__class__.__name__ != "StrategyRandomForest":
@@ -78,14 +78,14 @@ class HistoryAppTest:
         else:
             await self.init_candles_for_new_day(date_candle)
 
-        day = date_candle.day
+        month = date_candle.month
         for i in range(self.strategy.history_candles_length, len(all_candles_period)):
             date_candle = datetime.strptime(str(all_candles_period[i].time).replace('+00:00', ''), '%Y-%m-%d %H:%M:%S')
             if date_candle.weekday() in [5, 6]:
                 continue
-            # if day != date_candle.day:
-            #     day = date_candle.day
-            #     await self.init_candles_for_new_day(date_candle)
+            if month != date_candle.month:
+                month = date_candle.month
+                await self.init_candles_for_new_day(date_candle)
             self.action = await self.strategy.trade_logic(all_candles_period[i])
             self.take_action(all_candles_period[i])
 
@@ -106,7 +106,7 @@ class HistoryAppTest:
             #     self.bought_at = float(quotation_to_decimal(candle.close))
             #     self.sum -= self.bought_at * 3
             #     self.sum -= self.bought_at * 3 * self.commission
-            safe_counter = 0
+            safe_counter = 1
             if self.sum - float(quotation_to_decimal(candle.close)) - float(quotation_to_decimal(candle.close)) * self.commission > 0 and self.twice_in_row > safe_counter:  #and self.twice_in_row > 2
                 print("bought ", candle.close, candle.time)
                 self.bought_at = float(quotation_to_decimal(candle.close))
@@ -145,16 +145,16 @@ if __name__ == "__main__":
     # end_date = datetime(2023, 3, 1)
 
     # new small up
-    date_start = datetime(2024, 2, 1)
-    end_date = datetime(2024, 2, 27)
+    # date_start = datetime(2024, 2, 1)
+    # end_date = datetime(2024, 2, 27)
 
     # big up
     # date_start = datetime(2023, 3, 1)
     # end_date = datetime(2023, 4, 1)
 
     # small down
-    # date_start = datetime(2023, 9, 1)
-    # end_date = datetime(2023, 10, 1)
+    date_start = datetime(2023, 9, 1)
+    end_date = datetime(2023, 10, 1)
 
     test = HistoryAppTest(StrategyRandomForest(candle_interval), candle_interval, date_start, end_date)
     asyncio.run(test.trade())

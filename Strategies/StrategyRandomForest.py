@@ -18,6 +18,7 @@ from Strategies.StrategyRSI import StrategyRSI
 from Strategies.StrategyST import StrategyST
 from Strategies.StrategyStochRSI import StrategyStochRSI
 from Strategies.Utils.ActionEnum import ActionEnum
+from Utils.EMAScaler import EMAScaler
 from historyData.HistoryData import HistoryData
 
 
@@ -33,7 +34,8 @@ class StrategyRandomForest(Strategy):
         self.history_candles_length = max(strategy.history_candles_length for strategy in self.strategies)
 
         self.data_for_ss = pd.DataFrame
-        self.standard_scaler = StandardScaler()
+        #self.standard_scaler = StandardScaler()
+        self.EMA_scaler = EMAScaler(288)
 
         self.param_container = dict()
         #asyncio.run(self._initialize_moving_avg_container())
@@ -80,7 +82,7 @@ class StrategyRandomForest(Strategy):
 
         self.data_for_ss = pd.DataFrame(self.param_container)
         self.data_for_ss = self.data_for_ss.drop(self.data_for_ss.index[:self.history_candles_length])
-        self.standard_scaler.fit(self.data_for_ss)
+        self.EMA_scaler.fit(self.data_for_ss)
         self.data_for_ss, self.param_container = pd.DataFrame, dict()
 
     def _init_standard_candle_params(self, candle: Candle):
@@ -101,9 +103,8 @@ class StrategyRandomForest(Strategy):
                 self.param_container[param_name].append(params[param_name])
 
         self.data_for_ss = pd.DataFrame(self.param_container)
-        self.standard_scaler.partial_fit(self.data_for_ss)
-        scaled_data = self.standard_scaler.transform(self.data_for_ss)
-        #scaled_data = np.array(self.data_for_ss)
+        self.EMA_scaler.update_ema(self.data_for_ss)
+        scaled_data = np.array(self.EMA_scaler.transform(self.data_for_ss))
 
         prediction = self.model.predict(scaled_data)
         return prediction[0]
