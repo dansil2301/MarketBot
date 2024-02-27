@@ -68,7 +68,7 @@ class HistoryAppTest:
             return
         if self.action == ActionEnum.BUY:
             self.twice_in_row += 1
-            if (self.bought_at == 0.1 or not self.bought_at) : #and self.twice_in_row > 2
+            if (self.bought_at == 0.1 or not self.bought_at) and self.twice_in_row > 1: #and self.twice_in_row > 2
                 print("bought ", candle.close, candle.time)
                 self.bought_at = float(quotation_to_decimal(candle.close))
                 self.sum -= self.bought_at * 3
@@ -95,20 +95,20 @@ class HistoryAppTest:
 if __name__ == "__main__":
     candle_interval = CandleInterval.CANDLE_INTERVAL_1_MIN
     # big drop
-    # date_start = datetime(2022, 2, 1)
-    # end_date = datetime(2022, 3, 1)
+    date_start = datetime(2022, 2, 1)
+    end_date = datetime(2022, 3, 1)
 
     # small up
     # date_start = datetime(2023, 2, 1)
     # end_date = datetime(2023, 3, 1)
 
     # new small up
-    date_start = datetime(2024, 2, 1)
-    end_date = datetime(2024, 2, 25)
+    # date_start = datetime(2024, 2, 1)
+    # end_date = datetime(2024, 2, 25)
 
     # big up
     # date_start = datetime(2023, 3, 1)
     # end_date = datetime(2023, 4, 1)
 
-    test = HistoryAppTest(StrategyRSI(candle_interval), candle_interval, date_start, end_date)
+    test = HistoryAppTest(StrategyRandomForest(candle_interval), candle_interval, date_start, end_date)
     asyncio.run(test.trade())
