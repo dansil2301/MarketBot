@@ -41,6 +41,7 @@ class HistoryAppTest:
         self.endTime = endTime
 
         self.profit_loss = {"profit": 0, "loss": 0}
+        self.twice_in_row = 0
 
     async def trade(self) -> None:
         all_candles_period = await self.historyData.get_tinkoff_server_data(
@@ -51,11 +52,13 @@ class HistoryAppTest:
             self.strategy.initialize_moving_avg_container(period_candles)
         else:
             period = timedelta(days=20)
-            candles = await HistoryData().get_tinkoff_server_data(end=self.endTime, start=self.endTime - period,
+            candles = await HistoryData().get_tinkoff_server_data(end=self.startTime, start=self.startTime - period,
                                                                   interval=self.candle_interval)
             self.strategy.initialize_moving_avg_container(candles)
 
         for i in range(self.strategy.history_candles_length, len(all_candles_period)):
+            if datetime.strptime(str(all_candles_period[i].time).replace('+00:00', ''), '%Y-%m-%d %H:%M:%S').weekday() in [5, 6]:
+                continue
             self.action = await self.strategy.trade_logic(all_candles_period[i])
             self.take_action(all_candles_period[i])
         print(self.profit_loss)
@@ -64,15 +67,16 @@ class HistoryAppTest:
         if not candle:
             return
         if self.action == ActionEnum.BUY:
-
-            if self.bought_at == 0.1 or not self.bought_at:
-                print("bought ", candle.close)
+            self.twice_in_row += 1
+            if (self.bought_at == 0.1 or not self.bought_at) : #and self.twice_in_row > 2
+                print("bought ", candle.close, candle.time)
                 self.bought_at = float(quotation_to_decimal(candle.close))
                 self.sum -= self.bought_at * 3
                 self.sum -= self.bought_at * 3 * self.commission
         elif self.bought_at:
+            self.twice_in_row = 0
             current_percent = (float(quotation_to_decimal(candle.close)) / self.bought_at - 1) * 100
-            if current_percent > Settings().percent_up or current_percent < -Settings().percent_down:
+            if current_percent > Settings().percent_up or current_percent < -Settings().percent_down: #current_percent > Settings().percent_up or current_percent < -Settings().percent_down
 
                 if self.bought_at != 0.1 and self.bought_at:
                     if current_percent > Settings().percent_up:
@@ -85,7 +89,7 @@ class HistoryAppTest:
                     self.sum += current_sum * 3
                     self.sum -= current_sum * 3 * self.commission
                     self.bought_at = 0.1
-                    print(f"sold: ", self.sum, candle.close)
+                    print(f"sold: ", self.sum, candle.close, candle.time)
 
 
 if __name__ == "__main__":
@@ -99,12 +103,12 @@ if __name__ == "__main__":
     # end_date = datetime(2023, 3, 1)
 
     # new small up
-    date_start = datetime(2024, 1, 1)
-    end_date = datetime(2024, 2, 1)
+    date_start = datetime(2024, 2, 1)
+    end_date = datetime(2024, 2, 25)
 
     # big up
     # date_start = datetime(2023, 3, 1)
     # end_date = datetime(2023, 4, 1)
 
-    test = HistoryAppTest(StrategyRandomForest(candle_interval), candle_interval, date_start, end_date)
+    test = HistoryAppTest(StrategyRSI(candle_interval), candle_interval, date_start, end_date)
     asyncio.run(test.trade())

@@ -100,7 +100,7 @@ class StrategyST(Strategy):
 
     async def trade_logic(self, new_candle: Candle) -> ActionEnum:
         current_price = float(quotation_to_decimal(new_candle.close))
-        final_upper, final_lower = self._param_calculation(new_candle)
+        final_upper, final_lower, current_ATR = self._param_calculation(new_candle)
 
         if current_price > final_upper:
             return self.action.BUY
