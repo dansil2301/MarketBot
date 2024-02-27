@@ -2,6 +2,7 @@ import asyncio
 from datetime import timedelta, datetime
 
 import pandas as pd
+import numpy as np
 from joblib import load
 from sklearn.preprocessing import StandardScaler
 from tinkoff.invest.grpc.marketdata_pb2 import Candle, CandleInterval
@@ -102,6 +103,7 @@ class StrategyRandomForest(Strategy):
         self.data_for_ss = pd.DataFrame(self.param_container)
         self.standard_scaler.partial_fit(self.data_for_ss)
         scaled_data = self.standard_scaler.transform(self.data_for_ss)
+        #scaled_data = np.array(self.data_for_ss)
 
         prediction = self.model.predict(scaled_data)
         return prediction[0]
